@@ -611,6 +611,7 @@ function showStars(){$('stars').textContent='★ '+stars;}
 function popStars(){const st=$('stars');st.classList.remove('pop');void st.offsetWidth;st.classList.add('pop');}
 function setSess(s){sess=s;save('sess',s);}
 function showHeader(mode){ // 'app' | 'login' | 'teacher'
+  const br=document.querySelector('.brand');if(!br.dataset.t)br.dataset.t=br.textContent;br.textContent=mode==='login'?(location.hash==='#insegnante'?'Area insegnante':'Accesso alunni'):mode==='teacher'?'Area insegnante':br.dataset.t;
   $('hub').hidden=!$('back').hidden;
   $('levels').hidden=mode!=='app';$('stars').hidden=mode!=='app';
   $('who').hidden=mode!=='teacher';
@@ -685,7 +686,7 @@ function loginView(mode){
     h('div',{},h('h1',{class:'hero'},'Area insegnante'),h('p',{class:'intro'},'Crea una classe e dai il codice agli alunni, oppure apri i progressi della tua classe con il codice e il PIN. I progressi mostrano tutte le materie.')),
     h('div',{class:'logingrid'},fNew,fRep)));
   else view.replaceChildren(h('div',{class:'loginwrap'},
-    h('div',{},h('h1',{class:'hero'},'Quaderno di inglese'),h('p',{class:'intro'},'Parole, frasi e civiltà in inglese, con la pronuncia da ascoltare. Entra con il codice che ti ha dato l’insegnante: i tuoi esercizi e le tue stelle restano salvati su ogni dispositivo.')),
+    h('div',{},h('h1',{class:'hero'},'Accesso alunni'),h('p',{class:'intro'},'Scrivi il codice della classe che ti ha dato l’insegnante e il tuo nome. I tuoi esercizi e le tue stelle restano salvati su ogni dispositivo.')),
     h('div',{class:'logingrid one'},fStud),guest));
   $('main').scrollTop=0;
 }
