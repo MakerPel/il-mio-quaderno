@@ -218,6 +218,13 @@ table.rep{width:100%;border-collapse:collapse;font-size:16px}
 .rowcard{flex-direction:row;flex-wrap:wrap;align-items:center;gap:12px 18px;justify-content:space-between}
 .cap{color:var(--muted);font-weight:700;font-size:13px;text-transform:uppercase;width:100%}
 .ptext{font-size:19px;line-height:1.5;margin:0 0 6px;max-width:70ch}
+.sech{font-family:var(--display);font-size:24px;margin:0 0 4px}
+.roster{display:flex;flex-direction:column;gap:8px}
+.rrow{display:flex;align-items:center;gap:12px;padding:10px 12px;background:var(--paper);border-radius:12px;flex-wrap:wrap}
+.av{width:42px;height:42px;border-radius:50%;background:var(--blue);color:#fff;font-family:var(--display);font-weight:800;font-size:20px;display:flex;align-items:center;justify-content:center;flex:none}
+.rinfo{display:flex;flex-direction:column;flex:1;min-width:160px}
+.rinfo b{font-size:19px}.rinfo small{color:var(--muted);font-weight:700}
+.danger.armed{background:var(--pink);color:#fff;border-color:var(--pink)}
 /* barra in basso */
 .dock{background:var(--card);border-top:2px solid var(--line);padding:10px max(16px,env(safe-area-inset-right)) max(10px,env(safe-area-inset-bottom)) max(16px,env(safe-area-inset-left))}
 .keypad{display:grid;grid-template-columns:repeat(13,minmax(0,1fr));gap:6px;max-width:1000px;margin:0 auto 10px}
@@ -1169,10 +1176,10 @@ function loginView(mode){
   fNew.addEventListener('submit',async e=>{e.preventDefault();err2.textContent='Un momento…';
     try{const pin=$('t-pin').value;const c=await rpc('qm_crea_classe',{p_nome:$('t-nome').value,p_pin:pin});teacher={codice:c,pin};save('ultimoCodice',c);goTeacher();}
     catch(x){err2.textContent=x.message;}});
-  const fRep=h('form',{class:'card login'},h('h3',{},'Vedi i progressi della classe'),
+  const fRep=h('form',{class:'card login'},h('h3',{},'Vedi gli alunni e i progressi della classe'),
     field('r-cod','Codice della classe',{autocomplete:'off',autocapitalize:'characters',spellcheck:'false',maxlength:'6',required:true,value:load('ultimoCodice','')}),
     field('r-pin','PIN',{inputmode:'numeric',maxlength:'8',required:true,autocomplete:'off',type:'password'}),
-    h('button',{class:'btn',type:'submit'},'Apri i progressi'),err3);
+    h('button',{class:'btn',type:'submit'},'Apri la classe'),err3);
   fRep.addEventListener('submit',async e=>{e.preventDefault();err3.textContent='Un momento…';
     const t={codice:$('r-cod').value.trim().toUpperCase(),pin:$('r-pin').value};
     try{await rpc('qm_report',{p_codice:t.codice,p_pin:t.pin});teacher=t;save('ultimoCodice',t.codice);goTeacher();}
@@ -1218,12 +1225,22 @@ async function teacherView(){
       if(a.esercizi.length){const t2=h('table',{class:'rep small'},h('thead',{},h('tr',{},h('th',{},'Esercizio'),h('th',{},'Svolti'),h('th',{},'Risolti da soli'),h('th',{},'Soluzione vista'),h('th',{},'Ultima volta'))));
         const b2=h('tbody');a.esercizi.forEach(e=>b2.append(h('tr',{},h('td',{},exTitle(e.esercizio)),h('td',{class:'n'},String(e.tentativi)),h('td',{class:'n'},String(e.corretti)),h('td',{class:'n'},String(e.soluzioni)),h('td',{},when(e.ultimo)))));t2.append(b2);inner.append(t2);}
       else inner.append(h('p',{},'Nessun esercizio svolto.'));
-      const del=h('button',{class:'ghost danger',type:'button'},'Elimina alunno');let armed=false;
-      del.addEventListener('click',async()=>{if(!armed){armed=true;del.textContent=`Conferma: elimina ${a.nome} e i suoi risultati`;return;}
-        try{await rpc('qm_elimina_alunno',{p_codice:teacher.codice,p_pin:teacher.pin,p_alunno:a.id});teacherView();}catch(x){del.textContent=x.message;}});
-      inner.append(del);det.firstChild.append(inner);});
+      det.firstChild.append(inner);});
     list.append(h('div',{class:'tablewrap'},tb));}
-  view.replaceChildren(head,list);
+  const today=new Date().toDateString();
+  const ros=h('div',{class:'sheet',style:'margin-top:16px'},h('h2',{class:'sech'},`Alunni della classe (${al.length})`),
+    h('p',{class:'intro',style:'margin:0 0 10px'},'Qui trovi tutti gli alunni che sono entrati nella classe. Tocca «Elimina» due volte per cancellare un alunno con tutti i suoi risultati.'));
+  if(!al.length)ros.append(h('p',{class:'intro'},`Ancora nessun alunno. Dai il codice ${rep.codice} agli alunni.`));
+  else{const ul=h('div',{class:'roster'});
+    al.forEach(a=>{const oggi=new Date(a.ultimo_accesso).toDateString()===today;
+      const del=h('button',{class:'ghost danger',type:'button'},'🗑️ Elimina');let armed=false,tm=null;
+      del.addEventListener('click',async()=>{if(!armed){armed=true;del.textContent='Tocca ancora per confermare';del.classList.add('armed');tm=setTimeout(()=>{armed=false;del.textContent='🗑️ Elimina';del.classList.remove('armed');},4000);return;}
+        clearTimeout(tm);del.disabled=true;del.textContent='Elimino…';
+        try{await rpc('qm_elimina_alunno',{p_codice:teacher.codice,p_pin:teacher.pin,p_alunno:a.id});teacherView();}catch(x){del.disabled=false;del.textContent=x.message;}});
+      ul.append(h('div',{class:'rrow'},h('span',{class:'av','aria-hidden':'true'},a.nome.slice(0,1).toUpperCase()),
+        h('div',{class:'rinfo'},h('b',{},a.nome),h('small',{},(oggi?'🟢 entrato oggi · ':'Ultimo accesso: ')+when(a.ultimo_accesso)+` · ★ ${a.stelle} · ${a.tentativi} esercizi`)),del));});
+    ros.append(ul);}
+  view.replaceChildren(head,ros,list);
 }
 
 /* ---------- indice ed esercizi ---------- */
