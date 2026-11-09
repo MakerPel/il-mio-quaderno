@@ -167,7 +167,9 @@ svg.board{width:100%;height:auto;display:block;touch-action:manipulation}
 .who{font-size:15px;white-space:pre}
 .loginwrap{display:flex;flex-direction:column;gap:18px;max-width:900px;margin:0 auto}
 .hero{font-family:var(--display);font-size:clamp(30px,5vw,44px);line-height:1.05;margin:8px 0 4px;text-wrap:balance}
-.logingrid.one{grid-template-columns:minmax(0,520px)}
+.logingrid.one{grid-template-columns:minmax(0,620px)}
+.roster-in[hidden]{display:none}
+.btn.small{min-height:44px;padding:0 14px;font-size:16px}
 .logingrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:16px;align-items:start}
 .stack{display:flex;flex-direction:column;gap:16px}
 .login{background:var(--card);border:2px solid var(--line);box-shadow:0 4px 0 var(--line);gap:12px;padding:20px}
@@ -711,13 +713,28 @@ function loginView(mode){
     try{await rpc('qm_report',{p_codice:t.codice,p_pin:t.pin});teacher=t;save('ultimoCodice',t.codice);goTeacher();}
     catch(x){err3.textContent=x.message;}});
   const guest=h('button',{class:'linkbtn',type:'button',onclick:()=>{setSess({guest:true});stars=guestStars();route();}},'Prova senza salvare i risultati');
+  const rosterBox=h('div',{class:'card login roster-in',hidden:true});let rT=null,rLast='';
+  async function loadRoster(){const c=($('l-cod')?.value||'').trim().toUpperCase();if(c===rLast)return;rLast=c;
+    if(c.length!==6){rosterBox.hidden=true;return;}
+    rosterBox.hidden=false;rosterBox.replaceChildren(h('p',{class:'intro',style:'margin:0'},'Cerco la classe…'));
+    try{const r=await rpc('qm_alunni_classe',{p_codice:c});if(c!==rLast)return;
+      if(!r){rosterBox.replaceChildren(h('p',{class:'err',style:'margin:0'},'Nessuna classe con questo codice. Controlla le lettere.'));return;}
+      const tb=h('tbody');
+      r.alunni.forEach(a=>{const b=h('button',{type:'button',class:'btn primary small'},'Sono io');
+        b.addEventListener('click',()=>{$('l-nome').value=a.nome;fStud.requestSubmit?fStud.requestSubmit():fStud.dispatchEvent(new Event('submit',{cancelable:true}));});
+        tb.append(h('tr',{},h('td',{},h('b',{},a.nome)),h('td',{class:'n'},'★ '+a.stelle),h('td',{},when(a.ultimo)),h('td',{},b)));});
+      rosterBox.replaceChildren(h('h2',{},`Alunni della classe ${r.classe}`),
+        r.alunni.length?h('p',{class:'intro',style:'margin:0'},'Trovi il tuo nome? Tocca «Sono io». Se è la prima volta, scrivi il tuo nome qui sopra e tocca «Entra».'):h('p',{class:'intro',style:'margin:0'},'Nessun alunno ancora: sarai il primo! Scrivi il tuo nome qui sopra e tocca «Entra».'),
+        r.alunni.length?h('div',{class:'tablewrap'},h('table',{class:'rep'},h('thead',{},h('tr',{},h('th',{},'Alunno'),h('th',{},'Stelle'),h('th',{},'Ultimo accesso'),h('th',{},''))),tb)):null);}
+    catch(x){rosterBox.replaceChildren(h('p',{class:'err',style:'margin:0'},x.message));rLast='';}}
   if(mode==='teacher'&&!teachUnlocked()){view.replaceChildren(h('div',{class:'loginwrap'},pinGate(()=>loginView('teacher'))));setTimeout(()=>{try{$('g-pin').focus();}catch(e){}},50);return;}
   if(mode==='teacher')view.replaceChildren(h('div',{class:'loginwrap'},
     h('div',{},h('h1',{class:'hero'},'Area insegnante'),h('p',{class:'intro'},'Crea una classe e dai il codice agli alunni, oppure apri i progressi della tua classe con il codice e il PIN. I progressi mostrano tutte le materie.')),
     h('div',{class:'logingrid'},fNew,fRep)));
   else view.replaceChildren(h('div',{class:'loginwrap'},
     h('div',{},h('h1',{class:'hero'},'Accesso alunni'),h('p',{class:'intro'},'Scrivi il codice della classe che ti ha dato l’insegnante e il tuo nome. I tuoi esercizi e le tue stelle restano salvati su ogni dispositivo.')),
-    h('div',{class:'logingrid one'},fStud),guest));
+    h('div',{class:'logingrid one'},fStud,rosterBox),guest));
+  $('l-cod').addEventListener('input',()=>{clearTimeout(rT);rT=setTimeout(loadRoster,350);});loadRoster();
   $('main').scrollTop=0;
 }
 
