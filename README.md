@@ -1,4 +1,8 @@
-# Quaderno di matematica
+# Il mio quaderno
+
+Pagina principale con le materie. Per ora: **Quaderno di matematica** (cartella `matematica/`).
+
+## Quaderno di matematica
 
 Esercizi di matematica sempre nuovi (numeri, numeri relativi, monomi, frazioni, aree, piano cartesiano, geometria piana, cerchio e circonferenza, solidi) da usare su iPad o nel browser.
 
@@ -18,7 +22,8 @@ L'app si apre a tutto schermo con la sua icona e funziona anche senza rete; i ri
 
 ## Struttura
 
-- `index.html` – tutta l'app (HTML, CSS, JavaScript, nessuna dipendenza)
+- `index.html` – pagina principale «Il mio quaderno»
+- `matematica/index.html` – il quaderno di matematica (HTML, CSS, JavaScript, nessuna dipendenza)
 - `manifest.webmanifest`, `sw.js`, icone – installazione come app (PWA)
 - Dati: Supabase (tabelle `qm_classi`, `qm_alunni`, `qm_risultati`, accessibili solo tramite le funzioni `qm_*`)
 
