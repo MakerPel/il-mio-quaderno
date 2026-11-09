@@ -67,9 +67,22 @@ h2{font-family:var(--display);font-size:20px;margin:0;color:var(--muted);text-tr
 .stars[hidden]{display:none}
 .howto{background:var(--card);border:2px dashed var(--line);border-radius:16px;padding:14px 18px;color:var(--muted);line-height:1.5;font-size:16px;max-width:70ch}
 .howto b{color:var(--ink)}
+
+/* blocco in verticale sui dispositivi touch */
+.rotate{display:none}
+@media (orientation:landscape) and (hover:none) and (pointer:coarse){
+  .rotate{display:flex;position:fixed;inset:0;z-index:9999;background:#2a64d4;color:#fff;flex-direction:column;align-items:center;justify-content:center;gap:16px;text-align:center;padding:24px;font-family:"Baloo 2","Trebuchet MS",system-ui,sans-serif}
+  .rotate .ic{font-size:72px;line-height:1;animation:rot 2s ease-in-out infinite}
+  .rotate b{font-size:30px}.rotate span{font-size:18px;opacity:.9;font-family:"Andika",Verdana,sans-serif}
+  body{overflow:hidden}
+}
+@keyframes rot{0%,30%{transform:rotate(-90deg)}60%,100%{transform:rotate(0)}}
+@media (prefers-reduced-motion:reduce){.rotate .ic{animation:none}}
 </style>
 </head>
 <body>
+<div class="rotate" role="alert" aria-live="assertive"><div class="ic" aria-hidden="true">📱</div><b>Gira il dispositivo in verticale</b><span>Il quaderno si usa tenendo l’iPad in piedi.</span></div>
+
 <main>
   <header class="cover">
     <img src="apple-touch-icon.png?v=4" alt="" width="92" height="92">
@@ -157,6 +170,7 @@ document.getElementById('pinform').addEventListener('submit',async e=>{e.prevent
   try{const b=await crypto.subtle.digest('SHA-256',new TextEncoder().encode('qm-teach:'+pin.value));ok=[...new Uint8Array(b)].map(x=>x.toString(16).padStart(2,'0')).join('')===TEACH_H;}catch(x){}
   if(ok){try{sessionStorage.setItem('qm-teach-ok','1');}catch(x){}goT();}else{perr.textContent='PIN non corretto.';pin.value='';pin.focus();}});
 if('serviceWorker' in navigator&&location.protocol==='https:')navigator.serviceWorker.register('./sw.js').then(r=>r.update()).catch(()=>{});
+try{screen.orientation&&screen.orientation.lock&&screen.orientation.lock('portrait').catch(()=>{});}catch(e){}
 </script>
 </body>
 </html>

@@ -298,9 +298,22 @@ table.rep{width:100%;border-collapse:collapse;font-size:16px}
 .fb{flex:1;font-family:var(--display);font-weight:800;font-size:21px;min-width:180px;line-height:1.2}
 .fb.ok{color:var(--green)} .fb.no{color:var(--pink)} .fb.info{color:var(--muted)}
 [hidden]{display:none!important}
+
+/* blocco in verticale sui dispositivi touch */
+.rotate{display:none}
+@media (orientation:landscape) and (hover:none) and (pointer:coarse){
+  .rotate{display:flex;position:fixed;inset:0;z-index:9999;background:#2a64d4;color:#fff;flex-direction:column;align-items:center;justify-content:center;gap:16px;text-align:center;padding:24px;font-family:"Baloo 2","Trebuchet MS",system-ui,sans-serif}
+  .rotate .ic{font-size:72px;line-height:1;animation:rot 2s ease-in-out infinite}
+  .rotate b{font-size:30px}.rotate span{font-size:18px;opacity:.9;font-family:"Andika",Verdana,sans-serif}
+  body{overflow:hidden}
+}
+@keyframes rot{0%,30%{transform:rotate(-90deg)}60%,100%{transform:rotate(0)}}
+@media (prefers-reduced-motion:reduce){.rotate .ic{animation:none}}
 </style>
 </head>
 <body>
+<div class="rotate" role="alert" aria-live="assertive"><div class="ic" aria-hidden="true">📱</div><b>Gira il dispositivo in verticale</b><span>Il quaderno si usa tenendo l’iPad in piedi.</span></div>
+
 <div id="app">
   <header class="top">
     <a id="hub" class="ghost hublink" href="../">‹ Il mio quaderno</a>
@@ -720,12 +733,10 @@ function loginView(mode){
     try{const r=await rpc('qm_alunni_classe',{p_codice:c});if(c!==rLast)return;
       if(!r){rosterBox.replaceChildren(h('p',{class:'err',style:'margin:0'},'Nessuna classe con questo codice. Controlla le lettere.'));return;}
       const tb=h('tbody');
-      r.alunni.forEach(a=>{const b=h('button',{type:'button',class:'btn primary small'},'Sono io');
-        b.addEventListener('click',()=>{$('l-nome').value=a.nome;fStud.requestSubmit?fStud.requestSubmit():fStud.dispatchEvent(new Event('submit',{cancelable:true}));});
-        tb.append(h('tr',{},h('td',{},h('b',{},a.nome)),h('td',{class:'n'},'★ '+a.stelle),h('td',{},when(a.ultimo)),h('td',{},b)));});
+      r.alunni.forEach(a=>{tb.append(h('tr',{},h('td',{},h('b',{},a.nome)),h('td',{class:'n'},'★ '+a.stelle),h('td',{},when(a.ultimo))));});
       rosterBox.replaceChildren(h('h2',{},`Alunni della classe ${r.classe}`),
-        r.alunni.length?h('p',{class:'intro',style:'margin:0'},'Trovi il tuo nome? Tocca «Sono io». Se è la prima volta, scrivi il tuo nome qui sopra e tocca «Entra».'):h('p',{class:'intro',style:'margin:0'},'Nessun alunno ancora: sarai il primo! Scrivi il tuo nome qui sopra e tocca «Entra».'),
-        r.alunni.length?h('div',{class:'tablewrap'},h('table',{class:'rep'},h('thead',{},h('tr',{},h('th',{},'Alunno'),h('th',{},'Stelle'),h('th',{},'Ultimo accesso'),h('th',{},''))),tb)):null);}
+        r.alunni.length?h('p',{class:'intro',style:'margin:0'},'Scrivi il tuo nome qui sopra esattamente come compare nell’elenco e tocca «Entra». Se è la prima volta, scrivi il tuo nome.'):h('p',{class:'intro',style:'margin:0'},'Nessun alunno ancora: sarai il primo! Scrivi il tuo nome qui sopra e tocca «Entra».'),
+        r.alunni.length?h('div',{class:'tablewrap'},h('table',{class:'rep'},h('thead',{},h('tr',{},h('th',{},'Alunno'),h('th',{},'Stelle'),h('th',{},'Ultimo accesso'))),tb)):null);}
     catch(x){rosterBox.replaceChildren(h('p',{class:'err',style:'margin:0'},x.message));rLast='';}}
   if(mode==='teacher'&&!teachUnlocked()){view.replaceChildren(h('div',{class:'loginwrap'},pinGate(()=>loginView('teacher'))));setTimeout(()=>{try{$('g-pin').focus();}catch(e){}},50);return;}
   if(mode==='teacher')view.replaceChildren(h('div',{class:'loginwrap'},
@@ -816,6 +827,7 @@ function route(){
 window.addEventListener('hashchange',route);route();flush();refreshStars();
 window.addEventListener('pagehide',leaveEx);
 if('serviceWorker' in navigator&&location.protocol==='https:')navigator.serviceWorker.register('../sw.js',{scope:'../'}).then(r=>r.update()).catch(()=>{});
+try{screen.orientation&&screen.orientation.lock&&screen.orientation.lock('portrait').catch(()=>{});}catch(e){}
 </script>
 </body>
 </html>
