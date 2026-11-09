@@ -196,6 +196,26 @@ table.rep{width:100%;border-collapse:collapse;font-size:16px}
 .det td{background:var(--paper)}
 .detbox{display:flex;flex-direction:column;gap:10px;align-items:flex-start;padding:6px 0}
 .danger{color:var(--pink);border-color:#f3b6c8}
+
+/* euro */
+.purse{display:flex;flex-wrap:wrap;gap:8px;align-items:center;padding:10px;border:2px dashed var(--line);border-radius:14px;min-height:74px;background:#fff}
+.purse.tray{border-style:solid;background:var(--paper);margin-top:6px}
+.purse.pay.ok{border:3px solid var(--green);background:#e6f5ea}
+.purse.pay.no{border:3px solid var(--pink);background:#fde7ef}
+.money{display:block;flex:none}
+.mbtn{border:0;background:none;padding:3px;border-radius:10px;min-height:44px;min-width:44px;display:flex;align-items:center;justify-content:center}
+.mbtn:active{transform:scale(.94)}
+.ph{color:var(--muted);font-weight:700}
+.prod{display:flex;flex-direction:column;align-items:center;gap:2px;background:#fff;border:2px solid var(--line);border-radius:12px;padding:8px 10px;min-width:110px;text-align:center}
+.emo{font-size:40px;line-height:1.15}
+.pname{font-weight:700;text-transform:uppercase;font-size:14px}
+.price{font-family:var(--display);font-weight:800;font-size:22px;color:var(--pink);font-variant-numeric:tabular-nums}
+.prod.big{border:0;background:none}.prod.big .emo{font-size:76px}.prod.big .pname{font-size:18px}.prod.big .price{font-size:34px}
+.flyer{display:grid;grid-template-columns:repeat(auto-fill,minmax(120px,1fr));gap:10px;margin-bottom:16px;padding:12px;border-radius:14px;background:#fff6d8;border:2px solid #f1d572}
+.rows{display:flex;flex-direction:column;gap:12px}
+.rowcard{flex-direction:row;flex-wrap:wrap;align-items:center;gap:12px 18px;justify-content:space-between}
+.cap{color:var(--muted);font-weight:700;font-size:13px;text-transform:uppercase;width:100%}
+.ptext{font-size:19px;line-height:1.5;margin:0 0 6px;max-width:70ch}
 /* barra in basso */
 .dock{background:var(--card);border-top:2px solid var(--line);padding:10px max(16px,env(safe-area-inset-right)) max(10px,env(safe-area-inset-bottom)) max(16px,env(safe-area-inset-left))}
 .keypad{display:grid;grid-template-columns:repeat(13,minmax(0,1fr));gap:6px;max-width:1000px;margin:0 auto 10px}
@@ -321,7 +341,7 @@ function draw(name){
 }
 
 /* ---------- gli esercizi ---------- */
-const GROUPS=['Numeri e operazioni','Numeri relativi e monomi','Frazioni, aree e piano cartesiano','Geometria piana','Cerchio e circonferenza','Solidi'];
+const GROUPS=['Numeri e operazioni','Numeri relativi e monomi','Frazioni, aree e piano cartesiano','Geometria piana','Cerchio e circonferenza','Solidi','L’euro'];
 const LET='ABCDEFGHIJKLMNOPQRSTUVWXYZ';
 const WORDS=[
   ['SOLE','MARE','CASA','LUNA','CANE','ORSO','NEVE','RANA','TOPO','ROSA','PERA','GATTO','LUPO','VELA'],
@@ -907,6 +927,155 @@ const NET={
   cilindro(){const g=s('svg',{viewBox:'0 0 100 100'});g.append(s('rect',{x:10,y:30,width:80,height:40,...ST,'stroke-width':1.5}),s('circle',{cx:50,cy:17,r:13,...ST,fill:'#fff3c2','stroke-width':1.5}),s('circle',{cx:50,cy:83,r:13,...ST,fill:'#fff3c2','stroke-width':1.5}));return g;},
   cono(){const g=s('svg',{viewBox:'0 0 100 100'});g.append(s('path',{d:'M50 8 L14 62 A65 65 0 0 0 86 62 Z',...ST,'stroke-width':1.5}),s('circle',{cx:50,cy:84,r:12,...ST,fill:'#fff3c2','stroke-width':1.5}));return g;}
 };
+
+/* ---------- l'euro ---------- */
+const COINS=[1,2,5,10,20,50,100,200],NOTES=[500,1000,2000,5000,10000,20000,50000];
+const nomeDen=c=>c<100?`${c} ${c===1?'centesimo':'centesimi'}`:`${c/100} euro`;
+const fe=c=>'€ '+(c%100===0?String(c/100):(c/100).toFixed(2).replace('.',','));
+function coinEl(c){
+  const r={1:14,2:15.5,5:17,10:16.5,20:18,50:19.5,100:19,200:21}[c],S=2*r+4,cx=S/2;
+  const g=s('svg',{viewBox:`0 0 ${S} ${S}`,width:Math.round(S*1.45),height:Math.round(S*1.45),class:'money','aria-hidden':'true'});
+  const CU=['#cf8650','#8a4b26'],AU=['#e3bc4f','#9c7a1f'],AG=['#d9dde2','#7e8790'];
+  if(c<10)g.append(s('circle',{cx,cy:cx,r,fill:CU[0],stroke:CU[1],'stroke-width':1.5}));
+  else if(c<100)g.append(s('circle',{cx,cy:cx,r,fill:AU[0],stroke:AU[1],'stroke-width':1.5}));
+  else{const[o,i]=c===100?[AU,AG]:[AG,AU];g.append(s('circle',{cx,cy:cx,r,fill:o[0],stroke:o[1],'stroke-width':1.5}),s('circle',{cx,cy:cx,r:r*.66,fill:i[0],stroke:i[1],'stroke-width':1}));}
+  g.append(s('circle',{cx,cy:cx,r:r-3,fill:'none',stroke:'#0002','stroke-width':1,'stroke-dasharray':'1.5 2.5'}));
+  g.append(T(cx,cx+r*.2,c<100?String(c):String(c/100),{size:r*.95,fill:'#3a2a10'}),T(cx,cx+r*.62,c<100?'cent':'euro',{size:r*.36,fill:'#3a2a10'}));
+  return g;}
+function noteEl(c){
+  const col={500:'#a9adb3',1000:'#e07f72',2000:'#6f9be0',5000:'#f2a556',10000:'#73c07a',20000:'#e6c55a',50000:'#b98bd0'}[c];
+  const w={500:62,1000:65,2000:68,5000:71,10000:74,20000:77,50000:80}[c],H=36;
+  const g=s('svg',{viewBox:`0 0 ${w} ${H}`,width:Math.round(w*1.45),height:Math.round(H*1.45),class:'money','aria-hidden':'true'});
+  g.append(s('rect',{x:1,y:1,width:w-2,height:H-2,rx:3,fill:col,stroke:'#0004','stroke-width':1}));
+  g.append(s('path',{d:`M${w*.18} ${H-4} V${H*.42} A${w*.13} ${w*.13} 0 0 1 ${w*.44} ${H*.42} V${H-4} Z`,fill:'#ffffff55',stroke:'#0002','stroke-width':.8}));
+  g.append(s('rect',{x:w*.52,y:5,width:w*.4,height:H-10,rx:2,fill:'#ffffff44'}));
+  g.append(T(w*.72,H*.58,String(c/100),{size:14,fill:'#1d2b4f'}),T(w*.72,H*.85,'EURO',{size:6.5,fill:'#1d2b4f'}),T(w*.08+4,11,String(c/100),{size:7,fill:'#1d2b4f'}));
+  return g;}
+const moneyEl=c=>c<500?coinEl(c):noteEl(c);
+const purse=list=>h('div',{class:'purse'},list.map(moneyEl));
+function greedy(c,dens){const out=[];for(const d of[...dens].sort((a,b)=>b-a))while(c>=d){out.push(d);c-=d;}return out;}
+const PROD=[['🍞','pane'],['🥛','latte'],['🍝','pasta'],['🍪','biscotti'],['🍎','mele'],['🧃','succo di frutta'],['🍦','gelato'],['🥚','uova'],['🧀','formaggio'],['🍌','banane'],['🍫','cioccolata'],['🍅','pomodori'],['💧','acqua'],['🍕','pizza'],['🥨','grissini'],['🍯','miele'],['🧸','orsetto'],['⚽','pallone'],['📒','quaderno'],['✏️','matita'],['🎒','zaino'],['🪁','aquilone'],['🚂','trenino'],['🎨','colori']];
+const TOYS=PROD.slice(16);
+const prodTag=([e,n],price)=>h('div',{class:'prod'},h('span',{class:'emo','aria-hidden':'true'},e),h('span',{class:'pname'},n),price!=null?h('span',{class:'price'},fe(price)):null);
+const NAMES=[['Luca','m'],['Sara','f'],['Marco','m'],['Giulia','f'],['Anna','f'],['Paolo','m'],['Elisa','f'],['Matteo','m'],['Sofia','f'],['Davide','m'],['Chiara','f'],['Tommaso','m']];
+const eu=c=>(c%100===0?String(c/100):(c/100).toFixed(2).replace('.',','))+' €';
+
+EX.push(
+{id:'conta-soldi',g:6,title:'Conta i soldi',desc:'Calcola quanti soldi ci sono in ogni riquadro.',glyph:'€ 7,50',
+make(L){
+  const el=h('div');el.append(h('p',{class:'consegna'},L===1?'Conta e scrivi i soldi di ogni riquadro: prima gli euro, poi i centesimi.':'Calcola il totale dei soldi di ogni riquadro.'));
+  const grid=h('div',{class:'split'});
+  for(let n=0;n<2;n++){const dens=L===0?[100,200,500,1000,2000]:L===1?[10,20,50,100,200,500,1000]:[1,2,5,10,20,50,100,200,500,1000,2000,5000];
+    let list,tot;do{list=[...Array(rnd(L===0?3:4,L===0?6:L===1?7:9))].map(()=>pick(dens));tot=list.reduce((a,b)=>a+b,0);}while(L===0&&tot>5000||L===1&&tot%100===0);
+    if(L<2)list.sort((a,b)=>b-a);
+    const c=card(purse(list));
+    if(L===1)c.append(h('div',{class:'q'},'€',slot(Math.floor(tot/100)),'e',slot(tot%100),'centesimi'));
+    else c.append(h('div',{class:'q'},'Totale €',slot(tot/100)));
+    grid.append(c);}
+  el.append(grid);
+  return{el,check:()=>checkAll(el),solve:()=>solveAll(el)};
+}},
+{id:'monete-banconote',g:6,title:'Monete e banconote',desc:'Riconosci il valore di monete e banconote. Quante ne servono per fare 1 euro?',glyph:'50 cent',
+make(L){
+  const all=L===0?[1,2,5,10,20,50,100,200]:COINS.concat(NOTES);
+  const el=h('div');el.append(h('p',{class:'consegna'},'Scegli il nome giusto di ogni moneta o banconota.'));
+  const grid=h('div',{class:'cmp'});
+  shuffle(all).slice(0,4).forEach(c=>{const near=all.filter(x=>x!==c).sort((a,b)=>Math.abs(Math.log(a/c))-Math.abs(Math.log(b/c)));
+    const conf=all.find(x=>x!==c&&(x===c*100||x*100===c));const others=[...new Set([conf,...near.slice(0,4)].filter(Boolean))];
+    grid.append(h('div',{class:'card',style:'text-align:center;align-items:center'},moneyEl(c),choices(wordOpts(nomeDen(c).toUpperCase(),others.map(x=>nomeDen(x).toUpperCase()),L===2?3:2),nomeDen(c).toUpperCase())));});
+  el.append(grid);
+  if(L>0){const b=h('div',{class:'card',style:'margin-top:14px'},h('div',{class:'kicker'},'I sottomultipli dell’euro'));
+    shuffle([1,2,5,10,20,50]).slice(0,L===1?2:3).forEach(c=>b.append(h('div',{class:'q'},coinEl(c),`Quante monete da ${nomeDen(c)} servono per fare 1 euro?`,slot(100/c))));
+    el.append(b);}
+  return{el,check:()=>checkAll(el),solve:()=>solveAll(el)};
+}},
+{id:'paga-giusto',g:6,title:'Paga il prezzo giusto',desc:'Tocca monete e banconote per pagare la cifra esatta.',glyph:'€ → 🧸',
+make(L){
+  const tray=L===0?[100,200,500,1000,2000]:L===1?[10,20,50,100,200,500,1000,2000]:[1,2,5,10,20,50,100,200,500,1000,2000,5000];
+  const P=L===0?rnd(2,30)*100:L===1?rnd(1,40)*100+pick([0,10,20,30,40,50,60,70,80,90]):rnd(1,70)*100+rnd(1,99);
+  const it=pick(PROD);let paid=[];
+  const area=h('div',{class:'purse pay'});
+  function render(){area.classList.remove('ok','no');area.replaceChildren(...paid.map((c,i)=>{const b=h('button',{type:'button',class:'mbtn','aria-label':'togli '+nomeDen(c)},moneyEl(c));b.addEventListener('click',()=>{paid.splice(i,1);render();});return b;}));
+    if(!paid.length)area.append(h('span',{class:'ph'},'Il borsellino è vuoto: tocca i soldi qui sotto.'));}
+  const tr=h('div',{class:'purse tray'},tray.map(c=>{const b=h('button',{type:'button',class:'mbtn','aria-label':'aggiungi '+nomeDen(c)},moneyEl(c));b.addEventListener('click',()=>{paid.push(c);paid.sort((a,b)=>b-a);render();});return b;}));
+  render();
+  const el=h('div');el.append(h('p',{class:'consegna'},'Paga la cifra esatta. Tocca un pezzo nel borsellino per toglierlo.'));
+  el.append(h('div',{class:'split'},h('div',{class:'card',style:'align-items:center'},h('div',{class:'prod big'},h('span',{class:'emo'},it[0]),h('span',{class:'pname'},it[1]),h('span',{class:'price'},fe(P)))),
+    h('div',{},h('div',{class:'kicker'},'Il tuo borsellino'),area)));
+  el.append(h('div',{class:'kicker',style:'margin-top:14px'},'I soldi a disposizione'),tr);
+  return{el,check(){const ok=paid.reduce((a,b)=>a+b,0)===P;area.classList.add(ok?'ok':'no');return ok;},solve(){paid=greedy(P,tray);render();area.classList.add('ok');}};
+}},
+{id:'resto',g:6,title:'Il resto',desc:'Compro, pago con le banconote e calcolo il resto.',glyph:'10 € − 7 €',
+make(L){
+  const el=h('div');el.append(h('p',{class:'consegna'},'Calcola quanto ricevi di resto per ogni acquisto.'));
+  const rows=h('div',{class:'rows'});
+  shuffle(PROD).slice(0,3).forEach(it=>{let P,pay;
+    if(L===0){P=rnd(1,19)*100;if(P%500===0)P+=100;pay=[[500,1000,2000].find(n=>n>P)];}
+    else if(L===1){P=rnd(1,45)*100+pick([0,10,20,50,60,80,90]);if(P%500===0)P+=50;pay=[[500,1000,2000,5000].find(n=>n>P)];}
+    else{P=rnd(1,95)*100+rnd(1,99);pay=greedy((Math.floor(P/500)+1)*500,NOTES);}
+    const R=pay.reduce((a,b)=>a+b,0)-P;
+    rows.append(h('div',{class:'card rowcard'},prodTag(it,P),h('div',{},h('div',{class:'kicker'},'Pago con'),purse(pay)),h('div',{class:'q'},'Resto €',slot(R/100))));});
+  el.append(rows);
+  return{el,check:()=>checkAll(el),solve:()=>solveAll(el)};
+}},
+{id:'cambi',g:6,title:'I cambi',desc:'Quante monete o banconote servono per cambiarne una?',glyph:'20 € = 2 × 10 €',
+make(L){
+  const AS=[[500,1000,2000,5000],[100,200,500,1000],[100,200,1000,2000,5000,10000]][L],BS=[[100,200,500,1000,2000],[10,20,50,100,200,500],[5,10,20,50,100,200,500,1000,2000]][L],MX=[10,20,20][L];
+  const pairs=[];AS.forEach(a=>BS.forEach(b=>{if(b<a&&a%b===0&&a/b<=MX&&a/b>=2)pairs.push([a,b]);}));
+  const el=h('div');el.append(h('p',{class:'consegna'},'Scrivi quante monete o banconote servono per fare il cambio.'));
+  const grid=h('div',{class:'rows'});
+  shuffle(pairs).slice(0,4).forEach(([a,b])=>{const tA=a<500?'moneta':'banconota',tB=b<500?'monete':'banconote';
+    grid.append(h('div',{class:'card rowcard'},h('div',{class:'q',style:'text-transform:none'},moneyEl(a),op('='),slot(a/b),op('×'),moneyEl(b)),h('small',{class:'cap'},`1 ${tA} da ${nomeDen(a)} = … ${tB} da ${nomeDen(b)}`)));});
+  el.append(grid);
+  return{el,check:()=>checkAll(el),solve:()=>solveAll(el)};
+}},
+{id:'volantino',g:6,title:'Il volantino della spesa',desc:'Leggi i prezzi, calcola quanto spendi e il resto.',glyph:'🛒 € 3,50',
+make(L){
+  const items=shuffle(PROD.slice(0,16)).slice(0,8).map(p=>({p,c:L===0?rnd(1,6)*100:L===1?rnd(1,12)*50:rnd(9,180)*5}));
+  const el=h('div');el.append(h('p',{class:'consegna'},'Guarda il volantino e rispondi alle domande.'));
+  el.append(h('div',{class:'flyer'},items.map(i=>prodTag(i.p,i.c))));
+  const qs=h('div',{class:'rows'});const nm=i=>i.p[1];
+  const [a,b,c]=shuffle(items);
+  if(L===0){[[a,b],[b,c],[a,c]].forEach(([x,y])=>qs.append(h('div',{class:'q'},`Compri ${nm(x)} e ${nm(y)}. Quanto spendi? €`,slot((x.c+y.c)/100))));}
+  else if(L===1){qs.append(h('div',{class:'q'},`Compri ${nm(a)} e ${nm(b)}. Quanto spendi? €`,slot((a.c+b.c)/100)));
+    qs.append(h('div',{class:'q'},`Compri 2 confezioni di ${nm(c)} e 1 di ${nm(a)}. Quanto spendi? €`,slot((2*c.c+a.c)/100)));
+    const t=b.c+c.c,note=[500,1000,2000].find(n=>n>t);qs.append(h('div',{class:'q'},`Compri ${nm(b)} e ${nm(c)} e paghi con una banconota da ${note/100} €. Quanto ricevi di resto? €`,slot((note-t)/100)));}
+  else{qs.append(h('div',{class:'q'},`Compri ${nm(a)}, ${nm(b)} e ${nm(c)}. Quanto spendi? €`,slot((a.c+b.c+c.c)/100)));
+    const t=3*a.c+2*b.c;qs.append(h('div',{class:'q'},`Compri 3 confezioni di ${nm(a)} e 2 di ${nm(b)}. Quanto spendi? €`,slot(t/100)));
+    const note=[1000,2000,5000].find(n=>n>t);qs.append(h('div',{class:'q'},`Per la stessa spesa paghi con una banconota da ${note/100} €. Quanto ricevi di resto? €`,slot((note-t)/100)));}
+  el.append(qs);
+  return{el,check:()=>checkAll(el),solve:()=>solveAll(el)};
+}},
+{id:'problemi-euro',g:6,title:'Problemi con l’euro',desc:'Risparmi, spesa, resto, prezzi unitari e sconti.',glyph:'? €',
+make(L){
+  const NM=()=>{const[n,g]=pick(NAMES);return{n,m:g==='m',pr:g==='m'?'gli':'le'};};
+  const OBJ2=['un pallone','un libro','un quaderno','un gioco','un astuccio','un album da colorare','un trenino','un aquilone','uno zaino','una bambola','una torta','una maglietta'];
+  const cap=t=>t[0].toUpperCase()+t.slice(1);
+  const T0=[
+    ()=>{const p=NM(),a=rnd(5,40),b=rnd(2,20);return{t:`${p.n} ha ${a} € nel salvadanaio. La nonna ${p.pr} regala ${b} €. Quanti euro ha adesso?`,a:[['Risposta: €',a+b]]};},
+    ()=>{const p=NM(),a=rnd(10,50),b=rnd(2,a-1);return{t:`${p.n} ha ${a} €. Compra ${pick(OBJ2)} che costa ${b} €. Quanti euro ${p.pr} restano?`,a:[['Risposta: €',a-b]]};},
+    ()=>{const[x,y]=shuffle(OBJ2),a=rnd(2,25),b=rnd(2,25);return{t:`${cap(x)} costa ${a} € e ${y} costa ${b} €. Quanto si spende per comprarli tutti e due?`,a:[['Risposta: €',a+b]]};},
+    ()=>{const p=NM(),a=rnd(2,18),n=[5,10,20].find(v=>v>a);return{t:`${p.n} compra ${pick(OBJ2)} da ${a} € e paga con una banconota da ${n} €. Quanto riceve di resto?`,a:[['Resto: €',n-a]]};}];
+  const T1=[
+    ()=>{const p=NM(),c=rnd(12,45)*10;return{t:`${p.n} compra un gelato al costo di ${eu(c)} e lo paga con una banconota da 10 €. Quanto riceve di resto?`,a:[['Resto: €',(1000-c)/100]]};},
+    ()=>{const p=NM(),b=rnd(5,40)*50,c=rnd(2,20)*50,A=b+c+rnd(2,40)*100;return{t:`${p.n} possiede ${eu(A)}. Spende ${eu(b)} in cartoleria e ${eu(c)} all’edicola. Quanto spende in tutto? Quanto ${p.pr} rimane?`,a:[['Spende in tutto: €',(b+c)/100],['Gli rimangono: €'.replace('Gli',p.m?'Gli':'Le'),(A-b-c)/100]]};},
+    ()=>{const p=NM(),x=rnd(15,95);return{t:`${p.n} ha in tasca diverse monete per un totale di ${x} centesimi. Quanti centesimi ${p.pr} mancano per arrivare a 1 €?`,a:[['Mancano',100-x,'centesimi']]};},
+    ()=>{const p=NM(),n=rnd(2,6),c=rnd(8,25)*10;return{t:`${p.n} compra ${n} quaderni a ${eu(c)} ciascuno. Quanto spende?`,a:[['Spende: €',n*c/100]]};},
+    ()=>{const p=NM(),a=rnd(5,30)*100,b=rnd(5,40)*100,c=rnd(1,20)*50;return{t:`Per il compleanno ${p.n} riceve ${eu(a)} dal nonno, ${eu(b)} dalla nonna e ${eu(c)} dalla zia. Quanto riceve in tutto?`,a:[['In tutto: €',(a+b+c)/100]]};}];
+  const T2=[
+    ()=>{const p=NM(),n=rnd(3,6),q=rnd(5,9)*5,f=rnd(150,350),k=rnd(400,700);const t=n*q+f+k;return{t:`${p.n} va al supermercato e compra ${n} bottiglie d’acqua a ${eu(q)} ciascuna, un flacone di bagnoschiuma a ${eu(f)} e una confezione di pesce a ${eu(k)}. Quanto spende in tutto?`,a:[['In tutto: €',t/100]]};},
+    ()=>{const p=NM(),kg=rnd(2,13),c=pick([200,250,300,350,400,450]);return{t:`${p.n} ha comprato ${kg} kg di ciliegie a ${eu(c)} al kg. Quanto spende?`,a:[['Spende: €',kg*c/100]]};},
+    ()=>{const p=NM(),d=rnd(20,26),x=rnd(40,90);return{t:`${p.n} guadagna ${d*x} € lavorando ${d} giorni al mese. Quanto guadagna in ogni giornata di lavoro?`,a:[['Al giorno: €',x]]};},
+    ()=>{const n=rnd(15,30),x=rnd(5,15)*5;return{t:`Per una gita scolastica ${n} bambini hanno raccolto in tutto ${n*x} €. Quanto ha versato ogni bambino?`,a:[['Ogni bambino: €',x]]};},
+    ()=>{const c=pick([5,10,20,50]),e=rnd(1,5);return{t:`Quante monete da ${c} centesimi servono per fare ${e} €?`,a:[['Servono',e*100/c,'monete']]};},
+    ()=>{const p=rnd(2,10)*20,sc=pick([10,20,25,50]);return{t:`Un paio di scarpe costa ${p} €. Durante i saldi ha lo sconto del ${sc}%. Quanto si risparmia? Quanto si paga?`,a:[['Si risparmia: €',p*sc/100],['Si paga: €',p-p*sc/100]]};},
+    ()=>{const p=NM(),n=5,a=rnd(25,60)*10,m=4,b=rnd(30,80)*10,t=n*a+m*b,note=[5000,10000].find(v=>v>t);return{t:`Per la festa ${p.n} compra ${n} pizze a ${eu(a)} ciascuna e ${m} bottiglie di succo a ${eu(b)} ciascuna. Paga con una banconota da ${note/100} €. Quanto spende? Quanto riceve di resto?`,a:[['Spende: €',t/100],['Resto: €',(note-t)/100]]};}];
+  const pool=[T0,T1,T2][L];const el=h('div');el.append(h('p',{class:'consegna'},'Leggi il problema e scrivi la risposta. Se serve, usa la virgola per i centesimi.'));
+  shuffle(pool).slice(0,2).forEach((f,i)=>{const pb=f();const c=h('div',{class:'card',style:'margin-bottom:12px'},h('p',{class:'ptext'},h('b',{},(i+1)+'. '),pb.t));
+    pb.a.forEach(([lab,v,u])=>c.append(h('div',{class:'q',style:'text-transform:none'},lab,slot(v),u||'')));el.append(c);});
+  return{el,check:()=>checkAll(el),solve:()=>solveAll(el)};
+}}
+);
 
 /* ---------- collegamento a Supabase ---------- */
 const SB_URL='https://dginlwxxuuinvpyhsyfa.supabase.co';
