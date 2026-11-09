@@ -724,7 +724,7 @@ function route(){
 }
 window.addEventListener('hashchange',route);route();flush();refreshStars();
 window.addEventListener('pagehide',leaveEx);
-if('serviceWorker' in navigator&&location.protocol==='https:')navigator.serviceWorker.register('../sw.js',{scope:'../'}).catch(()=>{});
+if('serviceWorker' in navigator&&location.protocol==='https:')navigator.serviceWorker.register('../sw.js',{scope:'../'}).then(r=>r.update()).catch(()=>{});
 </script>
 </body>
 </html>

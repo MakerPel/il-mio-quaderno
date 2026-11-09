@@ -156,7 +156,7 @@ document.getElementById('pcancel').addEventListener('click',()=>{pb.hidden=true;
 document.getElementById('pinform').addEventListener('submit',async e=>{e.preventDefault();let ok=false;
   try{const b=await crypto.subtle.digest('SHA-256',new TextEncoder().encode('qm-teach:'+pin.value));ok=[...new Uint8Array(b)].map(x=>x.toString(16).padStart(2,'0')).join('')===TEACH_H;}catch(x){}
   if(ok){try{sessionStorage.setItem('qm-teach-ok','1');}catch(x){}goT();}else{perr.textContent='PIN non corretto.';pin.value='';pin.focus();}});
-if('serviceWorker' in navigator&&location.protocol==='https:')navigator.serviceWorker.register('./sw.js').catch(()=>{});
+if('serviceWorker' in navigator&&location.protocol==='https:')navigator.serviceWorker.register('./sw.js').then(r=>r.update()).catch(()=>{});
 </script>
 </body>
 </html>
