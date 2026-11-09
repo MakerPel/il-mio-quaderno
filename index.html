@@ -104,13 +104,21 @@ h2{font-family:var(--display);font-size:20px;margin:0;color:var(--muted);text-tr
         <span class="stars" id="stars-francese" hidden></span>
         <span class="go" style="color:#7b3fc4">Apri il quaderno ›</span>
       </a>
+      <a class="subject" href="tedesco/">
+        <span class="tab" style="background:#b8650b">Tedesco</span>
+        <b>Quaderno di tedesco</b>
+        <div class="sym" aria-hidden="true"><i>🇩🇪</i><i>👋</i><i>🔢</i><i>🎒</i></div>
+        <span class="d">Saluti, chiedere il nome e l’età, numeri fino a 20, der/die/das, famiglia, scuola, giorni e mesi: 10 tipi di esercizi.</span>
+        <span class="stars" id="stars-tedesco" hidden></span>
+        <span class="go" style="color:#b8650b">Apri il quaderno ›</span>
+      </a>
     </div>
   </section>
   <p class="howto"><b>Per averlo sull’iPad:</b> apri questa pagina in Safari, tocca <b>Condividi</b> e poi <b>Aggiungi alla schermata Home</b>.</p>
 </main>
 <script>
 const SB_URL='https://dginlwxxuuinvpyhsyfa.supabase.co',SB_KEY='sb_publishable_QZC4rmwQcjr7-yVXHMshwA_IKNYLqZl';
-const SUBJS=['matematica','italiano','inglese','francese'];
+const SUBJS=['matematica','italiano','inglese','francese','tedesco'];
 function ld(k,d){try{const v=localStorage.getItem('qm-'+k);return v==null?d:JSON.parse(v);}catch(e){return d;}}
 function show(per,tot,nome){
   SUBJS.forEach(s=>{const el=document.getElementById('stars-'+s);if(!el)return;const n=per[s]||0;el.textContent=`★ ${n} ${n===1?'stella':'stelle'}`;el.hidden=false;});
@@ -126,8 +134,8 @@ if(s&&s.token){
   fetch(SB_URL+'/rest/v1/rpc/qm_stelle',{method:'POST',headers:{'Content-Type':'application/json',apikey:SB_KEY},body:JSON.stringify({p_token:s.token})})
     .then(r=>r.ok?r.json():null).then(r=>{if(!r)return;s.per=r;s.stelle=r.totale;try{localStorage.setItem('qm-sess',JSON.stringify(s));}catch(e){}show(r,r.totale,s.nome);}).catch(()=>{});
 }else if(s&&s.guest){
-  const per={matematica:ld('stars-matematica',ld('stars',0)),italiano:ld('stars-italiano',0),inglese:ld('stars-inglese',0),francese:ld('stars-francese',0)};
-  show(per,per.matematica+per.italiano+per.inglese+per.francese,'');
+  const per={matematica:ld('stars-matematica',ld('stars',0)),italiano:ld('stars-italiano',0),inglese:ld('stars-inglese',0),francese:ld('stars-francese',0),tedesco:ld('stars-tedesco',0)};
+  show(per,per.matematica+per.italiano+per.inglese+per.francese+per.tedesco,'');
 }
 if('serviceWorker' in navigator&&location.protocol==='https:')navigator.serviceWorker.register('./sw.js').catch(()=>{});
 </script>
