@@ -1,0 +1,771 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#2a64d4">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="Il mio quaderno">
+<meta name="description" content="Esercizi di francese: lessico, frasi e civiltà.">
+<link rel="manifest" href="../manifest.webmanifest">
+<link rel="apple-touch-icon" href="../apple-touch-icon.png?v=4">
+<link rel="icon" type="image/png" href="../icon-192.png?v=4">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<title>Quaderno di francese</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Andika:wght@400;700&family=Baloo+2:wght@600;800&display=swap" rel="stylesheet">
+<style>
+:root{
+  --paper:#f7f9fe; --grid:#e1e8f6; --card:#ffffff; --line:#cdd7ec;
+  --ink:#1d2b4f; --muted:#56627f;
+  --blue:#2a64d4; --pink:#d6336c; --yellow:#ffd43b; --green:#2b9348; --box:#8cc63f;
+  --display:"Baloo 2","Trebuchet MS",system-ui,sans-serif;
+  --body:"Andika","Verdana",system-ui,sans-serif;
+  color-scheme:light;
+  /* layout: indice a schede raggruppate → foglio d'esercizio con tastierino fisso in basso */
+}
+*{box-sizing:border-box}
+html,body{height:100%;margin:0}
+body{background-color:var(--paper);background-image:linear-gradient(var(--grid) 1px,transparent 1px),linear-gradient(90deg,var(--grid) 1px,transparent 1px);background-size:26px 26px;color:var(--ink);font-family:var(--body);font-size:18px;-webkit-tap-highlight-color:transparent;touch-action:manipulation;-webkit-user-select:none;user-select:none}
+button{font:inherit;color:inherit;cursor:pointer;touch-action:manipulation}
+button:focus-visible{outline:3px solid var(--blue);outline-offset:2px}
+#app{height:100%;display:flex;flex-direction:column}
+.top{display:flex;align-items:center;gap:12px;flex-wrap:wrap;padding:max(10px,env(safe-area-inset-top)) max(16px,env(safe-area-inset-right)) 10px max(16px,env(safe-area-inset-left));background:var(--card);border-bottom:2px solid var(--line)}
+.brand{font-family:var(--display);font-weight:800;font-size:24px;line-height:1;margin-right:auto}
+.levels{display:flex;background:var(--paper);border:2px solid var(--line);border-radius:999px;padding:3px}
+.levels button{border:0;background:none;padding:6px 14px;border-radius:999px;font-weight:700;color:var(--muted);min-height:42px}
+.levels button[aria-pressed="true"]{background:var(--ink);color:#fff}
+.stars{font-family:var(--display);font-weight:800;font-size:22px;color:#8a6400;background:#fff3c2;border:2px solid #f1d572;border-radius:999px;padding:2px 14px;font-variant-numeric:tabular-nums}
+.stars.pop{animation:pop .5s}
+@keyframes pop{50%{transform:scale(1.3)}}
+@media (prefers-reduced-motion:reduce){.stars.pop{animation:none}}
+.hublink{display:inline-flex;align-items:center;text-decoration:none;color:inherit}
+.ghost{border:2px solid var(--line);background:var(--paper);border-radius:12px;min-height:44px;padding:0 14px;font-weight:700}
+main{flex:1;overflow:auto;-webkit-overflow-scrolling:touch;padding:20px 16px 32px}
+.wrap{max-width:1000px;margin:0 auto}
+
+/* indice */
+.intro{max-width:62ch;color:var(--muted);margin:4px 0 8px;line-height:1.5}
+.group h2{font-family:var(--display);font-size:20px;margin:22px 0 10px;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;text-wrap:balance}
+.tiles{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:14px}
+.tile{display:flex;flex-direction:column;align-items:flex-start;gap:6px;text-align:left;background:var(--card);border:2px solid var(--line);border-radius:16px;padding:14px 16px;min-height:150px;box-shadow:0 4px 0 var(--line)}
+.tile:active{transform:translateY(3px);box-shadow:0 1px 0 var(--line)}
+.glyph{font-family:var(--display);font-weight:800;font-size:28px;line-height:1;padding:8px 12px;border-radius:10px;background:var(--paper);border:2px dashed var(--line);white-space:nowrap}
+.tile b{font-family:var(--display);font-size:20px;line-height:1.15;margin-top:4px}
+.tile span{color:var(--muted);font-size:15px;line-height:1.35}
+
+/* foglio */
+.sheet{background:var(--card);border:2px solid var(--line);border-radius:18px;padding:20px;box-shadow:0 4px 0 var(--line)}
+.kicker{font-size:14px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.05em}
+.sheet h1{font-family:var(--display);font-size:28px;line-height:1.1;margin:2px 0 6px;text-wrap:balance}
+.consegna{font-weight:700;text-transform:uppercase;margin:0 0 16px;color:var(--muted);line-height:1.45;font-size:16px}
+.q{display:flex;align-items:center;gap:10px 12px;flex-wrap:wrap;margin:12px 0;font-weight:700;text-transform:uppercase;line-height:1.4}
+.slot{min-width:72px;height:56px;border:3px solid var(--box);border-radius:10px;background:#fff;font-family:var(--display);font-size:28px;font-weight:800;padding:0 8px;font-variant-numeric:tabular-nums;line-height:1}
+.slot.on{border-color:var(--blue);box-shadow:0 0 0 4px #2a64d433}
+.slot.ok{border-color:var(--green);background:#e6f5ea}
+.slot.no{border-color:var(--pink);background:#fde7ef}
+.given{min-width:56px;height:56px;display:inline-flex;align-items:center;justify-content:center;font-family:var(--display);font-size:30px;font-weight:800}
+.eq{display:flex;align-items:flex-start;gap:8px 10px;flex-wrap:wrap;margin:18px 0 6px;padding:14px;background:var(--paper);border-radius:14px}
+.col{display:flex;flex-direction:column;align-items:center;gap:4px}
+.col small{font-size:12px;font-weight:700;color:var(--muted);text-transform:uppercase;text-align:center;max-width:90px}
+.op{font-family:var(--display);font-size:32px;font-weight:800;height:56px;display:inline-flex;align-items:center}
+.op.small{font-size:18px;text-transform:uppercase;color:var(--muted)}
+.choice{display:inline-flex;gap:8px;flex-wrap:wrap;border-radius:14px;padding:3px}
+.choice.ok{box-shadow:0 0 0 3px var(--green)}
+.choice.no{box-shadow:0 0 0 3px var(--pink)}
+.chip{min-height:50px;min-width:50px;padding:0 16px;border:2px solid var(--line);background:#fff;border-radius:12px;font-weight:700;font-size:18px}
+.chip.sel{background:var(--ink);color:#fff;border-color:var(--ink)}
+.split{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:24px;align-items:start}
+@media (max-width:760px){.split{grid-template-columns:1fr}}
+
+/* divisione */
+.field{display:flex;flex-wrap:wrap;gap:6px;padding:12px;border:2px dashed var(--line);border-radius:14px;margin-bottom:8px}
+.obj{width:58px;height:58px;border-radius:14px;border:2px solid transparent;background:transparent;display:flex;align-items:center;justify-content:center;padding:0}
+.obj.pending{border-color:var(--blue);background:#e3ecfd}
+.obj.grouped{border-color:#0002}
+.obj svg{width:44px;height:44px}
+
+/* incroci */
+.hit{fill:transparent;cursor:pointer}
+.mark{fill:var(--pink);pointer-events:none;display:none}
+.mark.on{display:block}
+svg.board{width:100%;height:auto;display:block;touch-action:manipulation}
+
+/* numeri relativi */
+.expr{font-family:var(--display);font-size:40px;font-weight:800;letter-spacing:.02em;text-transform:none}
+.cmp{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:12px}
+.cmprow{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:10px 12px;background:var(--paper);border-radius:14px}
+.num{font-family:var(--display);font-size:30px;font-weight:800;min-width:60px;text-align:center;font-variant-numeric:tabular-nums}
+.sym .chip{font-family:var(--display);font-size:26px;padding:0;width:50px}
+.pair .chip{font-family:var(--display);font-size:28px;min-width:96px;height:64px;border-width:3px}
+.pair .chip.sel{background:var(--yellow);color:var(--ink);border-color:#d9aa00}
+.neg{color:var(--pink)} .pos{color:var(--blue)}
+
+/* codice */
+.word{display:flex;flex-wrap:wrap;gap:10px;margin:6px 0 18px}
+.lcell{display:flex;flex-direction:column;align-items:center;gap:4px}
+.lcell .lab{font-family:var(--display);font-weight:800;font-size:18px;white-space:nowrap;min-height:26px}
+.gap{width:26px}
+.lslot{width:56px;height:60px;border:3px solid var(--box);border-radius:10px;background:#fff;font-family:var(--display);font-size:32px;font-weight:800}
+.lslot.on{border-color:var(--blue);box-shadow:0 0 0 4px #2a64d433}
+.lslot.ok{border-color:var(--green);background:#e6f5ea}
+.lslot.no{border-color:var(--pink);background:#fde7ef}
+.ctable{display:grid;grid-template-columns:repeat(13,minmax(0,1fr));gap:5px}
+@media (max-width:700px){.ctable{grid-template-columns:repeat(7,minmax(0,1fr))}}
+.ccell{display:flex;flex-direction:column;align-items:center;gap:0;padding:6px 0;border:2px solid var(--line);border-radius:10px;background:#fff}
+.ccell .n{font-family:var(--display);font-weight:800;font-size:16px;font-variant-numeric:tabular-nums}
+.ccell b{font-family:var(--display);font-size:22px}
+
+/* frazioni */
+.fracrow{display:flex;align-items:center;gap:16px;flex-wrap:wrap}
+.figbox{display:flex;flex-direction:column;align-items:center;gap:10px;padding:10px;border-radius:14px;border:3px solid transparent}
+.figbox.ok{border-color:var(--green)} .figbox.no{border-color:var(--pink)}
+.part{fill:#fff;stroke:var(--ink);stroke-width:2;cursor:pointer}
+.part.on{fill:#79aaf7}
+.frac{display:inline-flex;flex-direction:column;align-items:center;font-family:var(--display);font-weight:800;font-size:30px;line-height:1.05}
+.frac>span:first-child{border-bottom:3px solid var(--ink);padding:0 6px 2px;min-width:40px;text-align:center}
+.frac .slot{height:48px;min-width:56px;font-size:24px;margin-bottom:4px}
+.bigop{font-family:var(--display);font-size:40px;font-weight:800}
+
+/* piano */
+.pts{display:grid;grid-template-columns:1fr 1fr;gap:6px 14px;font-family:var(--display);font-weight:800;font-size:22px;margin-bottom:10px}
+.next{padding:10px 14px;border-radius:12px;background:#e3ecfd;font-weight:700;margin:8px 0 4px}
+
+/* collega */
+.match{display:grid;grid-template-columns:1fr 1fr;gap:16px 28px}
+.mcol{display:flex;flex-direction:column;gap:10px}
+.pic,.nm{position:relative;border:3px solid var(--line);background:#fff;border-radius:14px;min-height:96px;display:flex;align-items:center;justify-content:center;gap:10px;padding:6px}
+.pic svg{width:84px;height:84px}
+.nm{font-weight:700;text-transform:uppercase;font-size:18px}
+.pic.sel,.nm.sel{border-color:var(--blue);box-shadow:0 0 0 4px #2a64d433}
+.pic.no{border-color:var(--pink)!important;background:#fde7ef}
+.pic.ok{border-color:var(--green)!important;background:#e6f5ea}
+.badge{position:absolute;top:6px;left:6px;width:28px;height:28px;border-radius:50%;color:#fff;font-weight:800;font-family:var(--display);display:flex;align-items:center;justify-content:center;font-size:17px}
+
+
+/* nuovi esercizi */
+.card{background:var(--paper);border-radius:14px;padding:14px;display:flex;flex-direction:column;gap:6px;min-width:0}
+.mcq{margin:4px 0}
+.mcq .q{margin:6px 0}
+.givens{font-family:var(--display);font-weight:800;font-size:22px;display:grid;gap:2px;margin:4px 0 8px;font-variant-numeric:tabular-nums}
+.hint{color:#6b5200;font-size:15px;font-weight:700;background:#fff3c2;padding:8px 12px;border-radius:10px;display:inline-block;margin:4px 0 8px;line-height:1.4}
+.alg{font-family:"Times New Roman",Georgia,serif;font-style:italic;font-size:28px;text-transform:none}
+.alg.big{font-size:30px;line-height:1.4;margin-bottom:4px;overflow-wrap:anywhere}
+.nbox{border:2px solid var(--line);border-radius:10px;padding:2px 12px;background:#fff}
+.field.mini{border-style:solid;padding:8px;margin:0;max-width:340px}
+.field.bad{border-color:var(--pink);background:#fde7ef}
+.addrow{display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+.obj.still{width:48px;height:48px}
+.obj.cut{position:relative}
+.obj.cut::after{content:"";position:absolute;inset:4px;background:linear-gradient(45deg,transparent 44%,#d6336c 44%,#d6336c 56%,transparent 56%),linear-gradient(-45deg,transparent 44%,#d6336c 44%,#d6336c 56%,transparent 56%)}
+.flab{font-family:var(--display);font-size:24px}
+.next.bad{background:#fde7ef;color:var(--pink)}
+
+/* accesso e insegnante */
+.who{font-size:15px;white-space:pre}
+.loginwrap{display:flex;flex-direction:column;gap:18px;max-width:900px;margin:0 auto}
+.hero{font-family:var(--display);font-size:clamp(30px,5vw,44px);line-height:1.05;margin:8px 0 4px;text-wrap:balance}
+.logingrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:16px;align-items:start}
+.stack{display:flex;flex-direction:column;gap:16px}
+.login{background:var(--card);border:2px solid var(--line);box-shadow:0 4px 0 var(--line);gap:12px;padding:20px}
+.login h2{font-family:var(--display);font-size:24px;margin:0}
+.login h3{font-family:var(--display);font-size:19px;margin:0;color:var(--muted)}
+.fld{display:flex;flex-direction:column;gap:6px;font-weight:700;font-size:15px;color:var(--muted)}
+.fld input{font:inherit;font-size:22px;font-weight:700;color:var(--ink);padding:10px 14px;border:3px solid var(--line);border-radius:12px;background:#fff;min-height:54px;-webkit-user-select:text;user-select:text}
+.fld input:focus{outline:none;border-color:var(--blue);box-shadow:0 0 0 4px #2a64d433}
+#l-cod,#r-cod{text-transform:uppercase;letter-spacing:.15em;font-family:var(--display)}
+.err{color:var(--pink);font-weight:700;margin:0;min-height:1.2em}
+.linkbtn{background:none;border:0;color:var(--blue);font-weight:700;text-decoration:underline;align-self:flex-start;min-height:44px;padding:0}
+.codebox{display:inline-flex;align-items:center;gap:14px;background:#fff3c2;border:2px dashed #e0b400;border-radius:14px;padding:10px 16px;margin:8px 0 14px;flex-wrap:wrap}
+.codebox span{font-weight:700;color:#6b5200}
+.codebox b{font-family:var(--display);font-size:34px;letter-spacing:.18em}
+.kpis{display:flex;gap:12px;flex-wrap:wrap;margin-bottom:14px}
+.kpis div{background:var(--paper);border-radius:12px;padding:10px 16px;display:flex;flex-direction:column;min-width:120px}
+.kpis b{font-family:var(--display);font-size:30px;line-height:1.1;font-variant-numeric:tabular-nums}
+.kpis span{color:var(--muted);font-weight:700;font-size:14px}
+.tablewrap{overflow-x:auto}
+table.rep{width:100%;border-collapse:collapse;font-size:16px}
+.rep th{text-align:left;font-size:13px;text-transform:uppercase;color:var(--muted);padding:8px;border-bottom:2px solid var(--line)}
+.rep td{padding:10px 8px;border-bottom:1px solid var(--line);vertical-align:middle}
+.rep td.n{font-family:var(--display);font-weight:800;font-size:20px;font-variant-numeric:tabular-nums}
+.rep.small td{padding:6px 8px;font-size:15px}.rep.small td.n{font-size:17px}
+.bar{display:inline-flex;align-items:center;gap:8px;min-width:140px}
+.bar i{display:block;height:10px;border-radius:5px;background:var(--green);min-width:2px}
+.bar em{font-style:normal;font-weight:800;font-family:var(--display)}
+.det td{background:var(--paper)}
+.detbox{display:flex;flex-direction:column;gap:10px;align-items:flex-start;padding:6px 0}
+.danger{color:var(--pink);border-color:#f3b6c8}
+
+/* euro */
+.purse{display:flex;flex-wrap:wrap;gap:8px;align-items:center;padding:10px;border:2px dashed var(--line);border-radius:14px;min-height:74px;background:#fff}
+.purse.tray{border-style:solid;background:var(--paper);margin-top:6px}
+.purse.pay.ok{border:3px solid var(--green);background:#e6f5ea}
+.purse.pay.no{border:3px solid var(--pink);background:#fde7ef}
+.money{display:block;flex:none}
+.mbtn{border:0;background:none;padding:3px;border-radius:10px;min-height:44px;min-width:44px;display:flex;align-items:center;justify-content:center}
+.mbtn:active{transform:scale(.94)}
+.ph{color:var(--muted);font-weight:700}
+.prod{display:flex;flex-direction:column;align-items:center;gap:2px;background:#fff;border:2px solid var(--line);border-radius:12px;padding:8px 10px;min-width:110px;text-align:center}
+.emo{font-size:40px;line-height:1.15}
+.pname{font-weight:700;text-transform:uppercase;font-size:14px}
+.price{font-family:var(--display);font-weight:800;font-size:22px;color:var(--pink);font-variant-numeric:tabular-nums}
+.prod.big{border:0;background:none}.prod.big .emo{font-size:76px}.prod.big .pname{font-size:18px}.prod.big .price{font-size:34px}
+.flyer{display:grid;grid-template-columns:repeat(auto-fill,minmax(120px,1fr));gap:10px;margin-bottom:16px;padding:12px;border-radius:14px;background:#fff6d8;border:2px solid #f1d572}
+.rows{display:flex;flex-direction:column;gap:12px}
+.rowcard{flex-direction:row;flex-wrap:wrap;align-items:center;gap:12px 18px;justify-content:space-between}
+.cap{color:var(--muted);font-weight:700;font-size:13px;text-transform:uppercase;width:100%}
+.ptext{font-size:19px;line-height:1.5;margin:0 0 6px;max-width:70ch}
+
+/* italiano */
+.reading{background:#fffdf6;border:2px solid #efe3c4;border-radius:16px;padding:16px 18px;font-size:20px;line-height:1.65;max-height:70vh;overflow:auto;-webkit-user-select:text;user-select:text}
+.reading p{margin:0 0 .6em}
+.rhead{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;margin-bottom:6px}
+.rhead h2{font-family:var(--display);font-size:26px;margin:0;text-transform:uppercase;letter-spacing:.03em}
+.speak{font-size:16px}
+.mcq .q{text-transform:none;font-size:18px}
+.card.vf{margin-bottom:10px}.card.vf .q{text-transform:none;margin:0}
+.answer{font-size:18px}
+.wchip{min-height:48px;padding:0 14px;border:2px solid var(--line);background:#fff;border-radius:12px;font-weight:700;font-size:19px}
+.wchip:disabled{opacity:.3}
+.wchip.in{background:#e3ecfd;border-color:var(--blue)}
+.bank{display:flex;flex-wrap:wrap;gap:8px;margin-top:8px}
+.built{display:flex;flex-wrap:wrap;gap:8px;min-height:64px;padding:8px;border:2px dashed var(--line);border-radius:12px;background:#fff;align-items:center}
+.built.ok{border:3px solid var(--green);background:#e6f5ea}.built.no{border:3px solid var(--pink);background:#fde7ef}
+.seq{display:flex;flex-direction:column;gap:10px;border-radius:14px;padding:4px}
+.seq.ok{box-shadow:0 0 0 3px var(--green)}.seq.no{box-shadow:0 0 0 3px var(--pink)}
+.seqcard{display:flex;align-items:center;gap:14px;text-align:left;border:2px solid var(--line);background:#fff;border-radius:14px;padding:12px 14px;font-size:19px;line-height:1.4;min-height:60px}
+.seqcard .num{flex:none;width:40px;height:40px;border-radius:50%;border:2px dashed var(--line);display:flex;align-items:center;justify-content:center;font-family:var(--display);font-weight:800;font-size:22px}
+.seqcard.on{border-color:var(--blue);background:#eef3ff}.seqcard.on .num{background:var(--blue);color:#fff;border-style:solid;border-color:var(--blue)}
+.cloze{margin:0;line-height:2.3}
+.blank{min-width:110px;height:42px;vertical-align:middle;border:0;border-bottom:3px solid var(--box);background:#f3f9ea;border-radius:8px 8px 0 0;font:inherit;font-weight:700;padding:0 8px;margin:0 2px}
+.blank.on{border-bottom-color:var(--blue);background:#e3ecfd}.blank.ok{border-bottom-color:var(--green);background:#e6f5ea}.blank.no{border-bottom-color:var(--pink);background:#fde7ef}
+.word{font-family:var(--display);font-weight:800;font-size:30px;line-height:1.1}
+.ctx{margin:4px 0;font-size:18px;line-height:1.5}
+.ctx mark{background:#fff3c2;padding:0 3px;border-radius:4px;font-weight:700}
+.defs{flex-direction:column;align-items:stretch;width:100%}
+.defs .chip{text-align:left;padding:10px 14px;line-height:1.35}
+.legend{display:flex;gap:8px;margin-bottom:12px;flex-wrap:wrap}
+.tg{font-weight:800;font-size:14px;padding:4px 12px;border-radius:999px;color:#fff}
+.tg.n,.tw.n{background:#2a64d4;color:#fff;border-color:#2a64d4}
+.tg.v,.tw.v{background:#d6336c;color:#fff;border-color:#d6336c}
+.tg.a,.tw.a{background:#2b9348;color:#fff;border-color:#2b9348}
+.tagline{font-size:24px;line-height:2.2;margin:0}
+.tw{border:2px solid transparent;background:#f2f5fb;border-radius:10px;padding:2px 8px;font:inherit;font-weight:700;min-height:44px}
+.tw.bad{outline:3px solid var(--pink);outline-offset:1px}
+
+/* inglese */
+.emo.big{font-size:60px;line-height:1.1}
+.say{border:0;background:#e3ecfd;border-radius:50%;width:42px;height:42px;font-size:20px;flex:none}
+.enw{font-size:20px}
+.col1{flex-direction:column;align-items:stretch;width:100%}
+.col1 .chip{text-align:left;padding:8px 14px;line-height:1.3;text-transform:none}
+.colours .chip{text-transform:none}
+.street{position:relative;display:grid;grid-template-columns:repeat(4,1fr);gap:10px;padding:12px 12px 34px;background:#eef3ff;border-radius:16px;margin-bottom:10px}
+.bld{display:flex;flex-direction:column;align-items:center;gap:4px;background:#fff;border:2px solid var(--line);border-radius:12px;padding:10px 6px;text-align:center;font-size:14px;position:relative;z-index:1}
+.road{position:absolute;left:0;right:0;bottom:8px;height:16px;background:repeating-linear-gradient(90deg,#9aa6c2 0 26px,#fff 26px 40px);border-radius:4px;opacity:.7}
+.postcard{display:grid;grid-template-columns:repeat(auto-fill,minmax(96px,1fr));gap:8px;padding:14px;border-radius:16px;background:#fff6d8;border:2px dashed #e0b400;margin-bottom:14px}
+.pc{display:flex;flex-direction:column;align-items:center;gap:2px;background:#fff;border-radius:12px;padding:8px 4px;text-align:center}
+.pc .emo{font-size:34px}.pc small{font-weight:700;color:var(--muted);text-transform:uppercase;font-size:11px}
+.letters .wchip,.letters+.bank .wchip{font-family:var(--display);font-size:26px;min-width:50px;text-transform:lowercase}
+
+/* francese */
+.seqtxt{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.letter{font-family:"Segoe Print","Bradley Hand","Comic Sans MS",var(--body);background:#fffef8;border-color:#e7dcc0}
+.letter p{margin:0 0 .35em}
+.flagfr{display:flex;width:120px;height:80px;border-radius:8px;overflow:hidden;border:2px solid var(--line);margin:0 0 14px}
+.flagfr i{flex:1}
+/* barra in basso */
+.dock{background:var(--card);border-top:2px solid var(--line);padding:10px max(16px,env(safe-area-inset-right)) max(10px,env(safe-area-inset-bottom)) max(16px,env(safe-area-inset-left))}
+.keypad{display:grid;grid-template-columns:repeat(13,minmax(0,1fr));gap:6px;max-width:1000px;margin:0 auto 10px}
+.keypad button{height:54px;border-radius:12px;border:2px solid var(--line);background:var(--paper);font-family:var(--display);font-size:26px;font-weight:800;box-shadow:0 3px 0 var(--line)}
+.keypad button:active{transform:translateY(2px);box-shadow:none}
+@media (max-width:620px){.keypad{grid-template-columns:repeat(7,minmax(0,1fr))}}
+.actions{display:flex;gap:10px;max-width:1000px;margin:0 auto;align-items:center;flex-wrap:wrap}
+.btn{min-height:54px;padding:0 20px;border-radius:12px;border:2px solid var(--ink);background:#fff;font-weight:800;font-family:var(--display);font-size:19px}
+.btn.primary{background:var(--blue);border-color:var(--blue);color:#fff}
+.fb{flex:1;font-family:var(--display);font-weight:800;font-size:21px;min-width:180px;line-height:1.2}
+.fb.ok{color:var(--green)} .fb.no{color:var(--pink)} .fb.info{color:var(--muted)}
+[hidden]{display:none!important}
+</style>
+</head>
+<body>
+<div id="app">
+  <header class="top">
+    <a id="hub" class="ghost hublink" href="../">‹ Il mio quaderno</a>
+    <button id="back" class="ghost" type="button" hidden>‹ Indice</button>
+    <div class="brand">Quaderno di francese</div>
+    <div class="levels" role="group" aria-label="Livello" id="levels"></div>
+    <div class="stars" id="stars" title="Stelle guadagnate">★ 0</div>
+    <button id="who" class="ghost who" type="button" hidden></button>
+  </header>
+  <main id="main"><div class="wrap" id="view"></div></main>
+  <div class="dock" id="dock" hidden>
+    <div class="keypad" id="keypad"></div>
+    <div class="actions">
+      <div class="fb" id="fb" aria-live="polite"></div>
+      <button class="btn" id="bSol" type="button">Soluzione</button>
+      <button class="btn" id="bNew" type="button">Nuovo esercizio</button>
+      <button class="btn primary" id="bChk" type="button">Controlla</button>
+    </div>
+  </div>
+</div>
+<script>
+/* ---------- utilità ---------- */
+const NS='http://www.w3.org/2000/svg';
+function h(tag,attrs,...kids){const e=document.createElement(tag);for(const[k,v]of Object.entries(attrs||{})){if(k==='class')e.className=v;else if(k.startsWith('on'))e.addEventListener(k.slice(2),v);else if(v!==false&&v!=null)e.setAttribute(k,v===true?'':v);}for(const k of kids.flat()){if(k==null||k===false)continue;e.append(k.nodeType?k:document.createTextNode(k));}return e;}
+function s(tag,attrs,...kids){const e=document.createElementNS(NS,tag);for(const[k,v]of Object.entries(attrs||{})){if(k.startsWith('on'))e.addEventListener(k.slice(2),v);else e.setAttribute(k,v);}for(const k of kids.flat()){if(k==null)continue;e.append(k.nodeType?k:document.createTextNode(k));}return e;}
+const rnd=(a,b)=>a+Math.floor(Math.random()*(b-a+1));
+const pick=a=>a[Math.floor(Math.random()*a.length)];
+const shuffle=a=>{a=a.slice();for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];}return a;};
+const sg=n=>n>0?'+'+n:n<0?'−'+(-n):'0';
+const fmt=n=>String(Math.round(n*100)/100).replace('.',',');
+const opTxt=d=>(d>0?' + ':' − ')+Math.abs(d);
+function load(k,d){try{const v=localStorage.getItem('qm-'+k);return v==null?d:JSON.parse(v);}catch(e){return d;}}
+function save(k,v){try{localStorage.setItem('qm-'+k,JSON.stringify(v));}catch(e){}}
+const row=(text,...ctrl)=>h('div',{class:'q'},h('span',{},text),...ctrl);
+const col=(el,label)=>h('div',{class:'col'},el,label?h('small',{},label):null);
+const op=t=>h('span',{class:'op'},t);
+const given=t=>h('span',{class:'given'},t);
+const GC=['#ffe08a','#b9e4c9','#c8d9ff','#ffc9d9','#e2d1ff','#ffd7b0','#c4f0f0','#e8e8a8','#f7c8f0'];
+const PC=['#2a64d4','#d6336c','#2b9348','#b8650b','#7b3fc4'];
+
+/* ---------- caselle numeriche e scelte ---------- */
+let active=null;
+function slot(ans){const b=h('button',{class:'slot',type:'button','aria-label':'casella da riempire'});b.dataset.v='';b.ans=ans;b.addEventListener('click',()=>focusSlot(b));return b;}
+function focusSlot(b){if(active)active.classList.remove('on');active=b;if(b){b.classList.add('on');b.classList.remove('ok','no');}}
+function setSlot(b,v){b.dataset.v=v;b.textContent=v.replace('-','−');b.classList.remove('ok','no');}
+function keyPress(k){
+  if(!cur)return;
+  if(!active||!cur.el.contains(active)){const f=[...cur.el.querySelectorAll('.slot')].find(x=>x.dataset.v==='');if(!f)return;focusSlot(f);}
+  let v=active.dataset.v;
+  if(k==='back')v=v.slice(0,-1);
+  else if(k==='neg')v=v.startsWith('-')?v.slice(1):'-'+v;
+  else if(k==='comma'){if(v.includes(','))return;v=(v===''||v==='-')?v+'0,':v+',';}
+  else{if(v.replace(/[-,]/g,'').length>=7)return;v=(v==='0'||v==='-0')?v.replace('0','')+k:v+k;}
+  setSlot(active,v);
+}
+function checkSlots(root){let ok=true;root.querySelectorAll('.slot').forEach(b=>{const v=b.dataset.v;const x=Number(v.replace(',','.'));const good=v!==''&&v!=='-'&&!isNaN(x)&&Math.abs(x-b.ans)<0.001;b.classList.toggle('ok',good);b.classList.toggle('no',!good);b.classList.remove('on');if(!good)ok=false;});return ok;}
+function solveSlots(root){root.querySelectorAll('.slot').forEach(b=>{setSlot(b,fmt(b.ans));b.classList.add('ok');});}
+function choices(opts,ans,cls){const g=h('div',{class:'choice '+(cls||''),role:'group'});g.ans=ans;g.val=null;opts.forEach(o=>{const b=h('button',{type:'button',class:'chip'},o);b.addEventListener('click',()=>{g.val=o;g.querySelectorAll('.chip').forEach(x=>x.classList.toggle('sel',x===b));g.classList.remove('ok','no');});g.append(b);});return g;}
+function checkChoices(root){let ok=true;root.querySelectorAll('.choice').forEach(g=>{const good=g.val===g.ans;g.classList.toggle('ok',good);g.classList.toggle('no',!good);if(!good)ok=false;});return ok;}
+function solveChoices(root){root.querySelectorAll('.choice').forEach(g=>{g.val=g.ans;g.querySelectorAll('.chip').forEach(x=>x.classList.toggle('sel',x.textContent===g.ans));g.classList.add('ok');g.classList.remove('no');});}
+const checkAll=root=>{const a=checkSlots(root),b=checkChoices(root);return a&&b;};
+const solveAll=root=>{solveSlots(root);solveChoices(root);};
+
+/* ---------- dati di francese ---------- */
+// [emoji, francese, italiano, (francese femminile), (italiano femminile), descrizione]
+const METIERS=[
+['🍎','professeur','professore','professeure','professoressa','Insegna a scuola.'],['🔧','mécanicien','meccanico','mécanicienne','meccanica','Ripara le auto.'],
+['🥖','boulanger','fornaio','boulangère','fornaia','Prepara il pane, la schiacciata e la pizza.'],['💊','pharmacien','farmacista','pharmacienne','farmacista','Vende le medicine.'],
+['🌷','jardinier','giardiniere','jardinière','giardiniera','Pianta i fiori e taglia le siepi.'],['🥩','boucher','macellaio','bouchère','macellaia','Vende la carne: da lui compri una bistecca.'],
+['🍽️','serveur','cameriere','serveuse','cameriera','Ti porta la pizza al tavolo.'],['🚦','agent','vigile','agente','vigilessa','Dirige il traffico.'],
+['🚕','chauffeur','autista','chauffeuse','autista','Guida il taxi.'],['💇','coiffeur','parrucchiere','coiffeuse','parrucchiera','Fa la piega ai capelli delle signore.'],
+['👗','vendeur','commesso','vendeuse','commessa','Ti aiuta a comprare i vestiti.'],['🚜','paysan','contadino','paysanne','contadina','Coltiva i campi.'],
+['🩺','docteur','dottore','docteure','dottoressa','Lo chiama la mamma quando hai la febbre.'],['💡','électricien','elettricista','électricienne','elettricista','Fa dei lavori nell’impianto elettrico di casa.'],
+['👮','policier','poliziotto','policière','poliziotta','Ti può fare una multa.'],['🪚','menuisier','falegname','menuisière','falegname','Costruisce mobili in legno.'],
+['🚒','pompier','pompiere','pompière','pompiera','Lo chiami se c’è un incendio.'],['🚰','plombier','idraulico','plombière','idraulica','Lo chiami quando si rompe un tubo dell’acqua.'],
+['🏊','maître nageur','bagnino','maître nageuse','bagnina','Controlla chi fa il bagno in piscina o al mare.'],['🩰','danseur','ballerino','danseuse','ballerina','Balla sul palcoscenico.'],
+['🖌️','peintre','imbianchino','peintre','imbianchina','Imbianca le pareti di casa.'],['🧵','couturier','sarto','couturière','sarta','Cuce i vestiti.'],
+['🐶','vétérinaire','veterinario','vétérinaire','veterinaria','Cura gli animali.']];
+const FAMILLE=[['👨','père','padre','m'],['👩','mère','madre','f'],['👦','frère','fratello','m'],['👧','sœur','sorella','f'],['👴','grand-père','nonno','m'],['👵','grand-mère','nonna','f']];
+const ECOLE=[['📕','livre','libro'],['📒','cahier','quaderno'],['✏️','crayon','matita'],['🖊️','stylo','penna'],['🧽','gomme','gomma'],['👝','trousse','astuccio'],['🎒','sac','zaino']];
+const CORPS=[['🙂','tête','testa'],['💇','cheveux','capelli'],['👁️','œil','occhio'],['👂','oreille','orecchio'],['👃','nez','naso'],['👄','bouche','bocca'],['💪','bras','braccio'],['✋','main','mano'],['☝️','doigt','dito'],['🦵','jambe','gamba'],['🦶','pied','piede']];
+const CORPS2=[['','cou','collo'],['','visage','viso'],['','dos','schiena'],['','ventre','pancia'],['','menton','mento'],['','coude','gomito'],['','pouce','pollice'],['','paume','palmo'],['','poignet','polso'],['','cuisse','coscia'],['','genou','ginocchio'],['','talon','tallone'],['','cheville','caviglia']];
+const MAISON=[['🏠','maison','casa'],['🏢','appartement','appartamento'],['🏡','villa','villa'],['🏰','château','castello'],['🚪','porte','porta'],['🪟','fenêtre','finestra'],['🪜','escalier','scala'],['🌳','jardin','giardino'],['🚗','garage','garage'],['','toit','tetto'],['','cheminée','camino'],['','mur','muro'],['','portail','cancello']];
+const PIECES=[['🍳','cuisine','cucina'],['🛏️','chambre à coucher','camera da letto'],['🛁','salle de bain','bagno'],['🛋️','séjour','soggiorno'],['🚗','garage','garage'],['🌳','jardin','giardino']];
+const OBJETS=[
+['🪟','fenêtre','finestra','Ci guardi fuori.'],['💡','lampe','lampada','L’accendi sulla scrivania.'],['🛏️','lit','letto','Ci dormi sopra.'],['💻','ordinateur','computer','Lo usi per scrivere testi.'],
+['','télécommande','telecomando','Serve a cambiare canale.'],['📺','téléviseur','televisore','Ci puoi guardare i cartoni animati.'],['','table','tavolo','Si apparecchia per mangiare.'],['🛋️','canapé','divano','Ti sdrai qui a guardare la TV.'],
+['📻','stéréo','stereo','Serve per ascoltare la musica.'],['🥛','verre','bicchiere','Serve per bere.'],['🛁','baignoire','vasca da bagno','Serve per fare un bagno caldo.'],['','four','forno','Serve per cuocere il pollo arrosto.'],
+['','évier','lavello','Dentro, la mamma lava i piatti.'],['','réfrigérateur','frigorifero','Tiene il cibo al fresco.'],['🔪','couteau','coltello','Serve per tagliare.'],['🍴','fourchette','forchetta','Serve per prendere la pasta e la carne.'],
+['🥄','cuiller','cucchiaio','Serve per mangiare la minestra.'],['🍽️','assiette','piatto','Ci metti il cibo per mangiare.'],['☕','tasse','tazza','Ci bevi il latte o il tè.'],['🪑','chaise','sedia','Ti ci siedi per mangiare.'],
+['','peigne','pettine','Serve per pettinarsi.'],['','serviette','asciugamano','Serve per asciugarsi.'],['🪥','brosse à dents','spazzolino','Serve per lavarsi i denti.'],['🧼','savon','sapone','Si usa per lavarsi le mani.'],
+['','sèche-cheveux','asciugacapelli','Serve per asciugarsi i capelli.'],['🪒','rasoir','rasoio','Serve per farsi la barba.'],['🪞','miroir','specchio','Ci guardi la tua immagine.'],['🚿','douche','doccia','Ti lavi stando in piedi.'],['🚽','WC','water','Si trova in bagno e si tira lo sciacquone.']];
+const VETEMENTS=[['👓','lunettes','occhiali'],['👟','baskets','scarpe da ginnastica'],['🧥','veste','giacca'],['👕','t-shirt','maglietta'],['👖','pantalon','pantaloni'],['👔','chemise','camicia'],['🧢','casquette','cappellino'],['👜','sac','borsa'],['🩴','sandales','sandali'],['👗','jupe','gonna']];
+const SPORTS=[['🏇','équitation','equitazione'],['🏐','volley-ball','pallavolo'],['🏹','tir à l’arc','tiro con l’arco'],['🚴','cyclisme','ciclismo'],['🏊','natation','nuoto']];
+const MOMENTS=[['🌅','le matin','la mattina'],['🌤️','l’après-midi','il pomeriggio'],['🌆','le soir','la sera'],['🌙','la nuit','la notte']];
+const JOURS=[['','lundi','lunedì'],['','mardi','martedì'],['','mercredi','mercoledì'],['','jeudi','giovedì'],['','vendredi','venerdì'],['','samedi','sabato'],['','dimanche','domenica']];
+const MOIS=[['','janvier','gennaio'],['','février','febbraio'],['','mars','marzo'],['','avril','aprile'],['','mai','maggio'],['','juin','giugno'],['','juillet','luglio'],['','août','agosto'],['','septembre','settembre'],['','octobre','ottobre'],['','novembre','novembre'],['','décembre','dicembre']];
+const METEO=[['☀️','il y a du soleil','c’è il sole'],['💨','il y a du vent','c’è vento'],['🌧️','il pleut','piove'],['❄️','il neige','nevica'],['🥵','il fait chaud','fa caldo'],['🥶','il fait froid','fa freddo']];
+const SANTE=[['💪','je suis en pleine forme','sono in buona forma'],['🤢','j’ai mal au ventre','ho mal di pancia'],['🤒','j’ai de la fièvre','ho la febbre'],['😷','j’ai la toux','ho la tosse'],['🤕','j’ai mal à la tête','ho mal di testa']];
+const COULEURS=[['🟥','rouge','rosso'],['🟨','jaune','giallo'],['🟩','vert','verde'],['🟦','bleu','blu'],['🟧','orange','arancione'],['🩷','rose','rosa'],['🟪','violet','viola'],['🟫','marron','marrone'],['⬛','noir','nero'],['⬜','blanc','bianco'],['🩶','gris','grigio']];
+const ACTIONS=[['⏰','je me réveille','mi sveglio','se réveiller'],['🛏️','je me lève','mi alzo','se lever'],['🚿','je me lave','mi lavo','se laver'],['👕','je m’habille','mi vesto','s’habiller'],
+['🥐','je prends mon petit-déjeuner','faccio colazione','prendre son petit-déjeuner'],['🏫','je vais au collège','vado a scuola','aller au collège'],['📚','j’ai cours','faccio lezione','avoir cours'],
+['🏠','je rentre à la maison','torno a casa','rentrer à la maison'],['✏️','je fais mes devoirs','faccio i compiti','faire les devoirs'],['🍲','je dîne','ceno','dîner'],['😴','je me couche','vado a letto','se coucher']];
+const TOPICS=[
+{n:'I mestieri',w:METIERS.map(m=>[m[0],m[1],m[2]])},{n:'La famiglia',w:FAMILLE.map(f=>[f[0],f[1],f[2]])},{n:'Gli oggetti della scuola',w:ECOLE},{n:'Il corpo',w:CORPS.concat(CORPS2)},
+{n:'La casa',w:MAISON},{n:'Le stanze della casa',w:PIECES},{n:'Gli oggetti di casa',w:OBJETS.map(o=>[o[0],o[1],o[2]])},{n:'I vestiti',w:VETEMENTS},{n:'Gli sport',w:SPORTS},
+{n:'Le parti della giornata',w:MOMENTS},{n:'I giorni della settimana',w:JOURS},{n:'I mesi',w:MOIS},{n:'Il tempo atmosferico',w:METEO},{n:'Come ti senti?',w:SANTE},{n:'I colori',w:COULEURS},{n:'Le azioni della giornata',w:ACTIONS.map(a=>[a[0],a[3],a[2]])}];
+
+/* ---------- utilità ---------- */
+const mcq=(q,opts,ans)=>h('div',{class:'mcq'},h('div',{class:'q'},q),choices(opts,ans));
+const wordOpts=(ans,others,n=2)=>shuffle([ans,...shuffle([...new Set(others)].filter(x=>x!==ans)).slice(0,n)]);
+const card=(...k)=>h('div',{class:'card'},...k);
+const chipBtn=(w,f,cls='')=>{const b=h('button',{type:'button',class:'wchip '+cls},w);b.addEventListener('click',f);return b;};
+function say(text){try{speechSynthesis.cancel();const u=new SpeechSynthesisUtterance(text);u.lang='fr-FR';u.rate=.85;speechSynthesis.speak(u);}catch(e){}}
+const sayBtn=text=>('speechSynthesis' in window)?h('button',{type:'button',class:'say','aria-label':'Ascolta: '+text,onclick:e=>{e.stopPropagation();say(text);}},'🔊'):null;
+const emo=(e,big)=>e?h('span',{class:'emo'+(big?' big':''),'aria-hidden':'true'},e):null;
+const artIt=(w,f)=>f?(/^[aeiouà-ù]/i.test(w)?'un’':'una '):(/^(s[^aeiou]|z|gn|ps|x|y)/i.test(w)?'uno ':'un ');
+const cap1=s=>s[0].toUpperCase()+s.slice(1);
+function matcher(pairs){
+  const L=shuffle(pairs.map((p,i)=>({t:p[0],i}))),R=shuffle(pairs.map((p,i)=>({t:p[1],i})));const link=new Map();let sl=null,sr=null;
+  const lb=L.map(x=>{const b=h('button',{type:'button',class:'nm'},x.t);b.addEventListener('click',()=>{link.delete(x);sl=x;go();});return b;});
+  const rb=R.map(x=>{const b=h('button',{type:'button',class:'nm'},x.t);b.addEventListener('click',()=>{for(const[k,v]of link)if(v===x)link.delete(k);sr=x;go();});return b;});
+  function go(){if(sl&&sr){link.set(sl,sr);sl=sr=null;}paint();}
+  function paint(){L.forEach((x,k)=>{const b=lb[k],c=PC[k%PC.length];b.classList.remove('ok','no');b.classList.toggle('sel',sl===x);b.querySelector('.badge')?.remove();if(link.has(x)){b.style.borderColor=c;b.prepend(h('span',{class:'badge',style:'background:'+c},String(k+1)));}else b.style.borderColor='';});
+    R.forEach((x,k)=>{const b=rb[k];b.classList.toggle('sel',sr===x);b.querySelector('.badge')?.remove();const e=[...link].find(([a,v])=>v===x);if(e){const j=L.indexOf(e[0]),c=PC[j%PC.length];b.style.borderColor=c;b.prepend(h('span',{class:'badge',style:'background:'+c},String(j+1)));}else b.style.borderColor='';});}
+  const el=h('div',{class:'match'},h('div',{class:'mcol'},lb),h('div',{class:'mcol'},rb));
+  return{el,check(){paint();let ok=true;L.forEach((x,k)=>{const g=link.get(x)?.i===x.i;lb[k].classList.add(g?'ok':'no');if(!g)ok=false;});return ok;},
+    solve(){link.clear();L.forEach(x=>link.set(x,R.find(r=>r.i===x.i)));sl=sr=null;paint();lb.forEach(b=>b.classList.add('ok'));}};
+}
+function sequencer(items,label){ // items: testi nell'ordine giusto
+  let order=[];const cards=shuffle(items.map((s,i)=>({s,i})));const box=h('div',{class:'seq'});
+  function render(){box.classList.remove('ok','no');box.replaceChildren(...cards.map(c=>{const k=order.indexOf(c);const b=h('button',{type:'button',class:'seqcard'+(k>=0?' on':'')},h('span',{class:'num'},k>=0?String(k+1):''),label?label(c.s):h('span',{},c.s));
+    b.addEventListener('click',()=>{if(k>=0)order.splice(k,1);else order.push(c);render();});return b;}));}
+  render();
+  return{el:box,check(){const ok=order.length===items.length&&order.every((c,k)=>c.i===k);box.classList.add(ok?'ok':'no');return ok;},solve(){order=items.map((s,i)=>cards.find(c=>c.i===i));render();box.classList.add('ok');}};
+}
+/* ritratto disegnato */
+const HAIR={bruns:'#4a2a14',blonds:'#efc75e',roux:'#c8581f',châtains:'#8a5a2b',noirs:'#151515'};
+const EYES={bleus:'#2f7de1',verts:'#2b9348',marron:'#7a4a1e',noirs:'#151515'};
+function portrait(o){
+  const g=s('svg',{viewBox:'0 0 140 170',class:'board',style:'max-width:190px;margin:0 auto','aria-hidden':'true'});const hc=HAIR[o.hair];
+  if(o.len==='longs')g.append(s('path',{d:'M28 70 Q26 30 70 26 Q114 30 112 70 L118 140 Q70 150 22 140 Z',fill:hc}));
+  g.append(s('path',{d:'M30 170 Q34 128 70 126 Q106 128 110 170 Z',fill:o.shirt}));
+  g.append(s('rect',{x:62,y:104,width:16,height:24,fill:'#f2c9a4'}));
+  g.append(s('ellipse',{cx:70,cy:74,rx:36,ry:40,fill:'#f6d3b3',stroke:'#d9a87f','stroke-width':1.5}));
+  g.append(s('path',{d:o.len==='longs'?'M33 70 Q30 30 70 30 Q110 30 107 70 Q100 46 70 44 Q40 46 33 70 Z':'M34 64 Q34 30 70 30 Q106 30 106 64 Q98 44 70 42 Q42 44 34 64 Z',fill:hc}));
+  [52,88].forEach(x=>{g.append(s('ellipse',{cx:x,cy:76,rx:9,ry:7,fill:'#fff',stroke:'#c9b8a8'}),s('circle',{cx:x,cy:76,r:5,fill:EYES[o.eyes]}),s('circle',{cx:x+1.5,cy:74.5,r:1.5,fill:'#fff'}));});
+  g.append(s('path',{d:'M58 96 Q70 106 82 96',fill:'none',stroke:'#a5492f','stroke-width':3,'stroke-linecap':'round'}),s('path',{d:'M70 80 L67 90 L72 90',fill:'none',stroke:'#c99470','stroke-width':2}));
+  return g;}
+const CITIES=['Montalcino','Siena','Firenze','Roma','Milano','Napoli','Torino','Bologna'];
+const PRENOMS=[['Daniel','m'],['Luca','m'],['Marco','m'],['Paolo','m'],['Giulia','f'],['Sara','f'],['Anna','f'],['Chiara','f']];
+const AIME=[['aller en vélo','andare in bici'],['nager','nuotare'],['danser','ballare'],['jouer au foot','giocare a calcio'],['lire','leggere'],['dessiner','disegnare']];
+const ANIMAUX=[['🐶','le chien','il cane'],['🐱','le chat','il gatto'],['🐴','le cheval','il cavallo'],['🐰','le lapin','il coniglio']];
+
+/* ---------- esercizi di francese ---------- */
+const GROUPS=['Le parole · Les mots','Le frasi · Les phrases','Civiltà · La France'];
+const withEmoji=t=>t.w.filter(w=>w[0]);
+const EX=[
+{id:'fr-vocab',g:0,title:'Images et mots',desc:'Guarda il disegno e scegli la parola francese giusta.',glyph:'🥖 = ?',
+make(L){
+  const tps=TOPICS.filter(t=>withEmoji(t).length>=5);const tp=pick(tps);const pool=withEmoji(tp);const items=shuffle(pool).slice(0,6);
+  const el=h('div');el.append(h('p',{class:'consegna'},`Argomento: ${tp.n}. Scegli la parola francese giusta per ogni disegno.`));
+  const grid=h('div',{class:'cmp'});
+  items.forEach(w=>grid.append(h('div',{class:'card',style:'align-items:center;text-align:center'},emo(w[0],true),L<2?h('small',{class:'cap'},w[2]):null,choices(wordOpts(w[1],pool.map(x=>x[1]),L===2?3:2),w[1],'col1'))));
+  el.append(grid);
+  return{el,check:()=>checkAll(el),solve:()=>solveAll(el)};
+}},
+{id:'fr-traduci',g:0,title:'Traduis le mot',desc:'Dal francese all’italiano e dall’italiano al francese.',glyph:'chat = gatto',
+make(L){
+  const tp=pick(TOPICS.filter(t=>t.w.length>=5));const items=shuffle(tp.w).slice(0,6);const el=h('div');
+  el.append(h('p',{class:'consegna'},`Argomento: ${tp.n}. Scegli la traduzione giusta. Tocca 🔊 per ascoltare la parola francese.`));
+  const grid=h('div',{class:'cmp'});
+  items.forEach((w,i)=>{const toIt=L===0||(L===1&&i%2===0);
+    grid.append(h('div',{class:'card'},h('div',{class:'q',style:'text-transform:none'},L===0?emo(w[0]):null,toIt?h('b',{class:'enw'},w[1]):h('b',{},w[2]),toIt?sayBtn(w[1]):null),
+      toIt?choices(wordOpts(w[2],tp.w.map(x=>x[2]),L===2?3:2),w[2],'col1'):choices(wordOpts(w[1],tp.w.map(x=>x[1]),L===2?3:2),w[1],'col1')));});
+  el.append(grid);
+  return{el,check:()=>checkAll(el),solve:()=>solveAll(el)};
+}},
+{id:'fr-collega',g:0,title:'Associe les mots',desc:'Collega ogni parola francese alla sua traduzione.',glyph:'FR ↔ IT',
+make(L){
+  const tp=pick(TOPICS.filter(t=>t.w.length>=6));const n=[4,5,6][L];const items=shuffle(tp.w).slice(0,n);
+  const m=matcher(items.map(w=>[(L===0&&w[0]?w[0]+' ':'')+w[1],w[2]]));
+  const el=h('div');el.append(h('p',{class:'consegna'},`Argomento: ${tp.n}. Tocca una parola francese e poi la sua traduzione italiana.`),m.el);
+  return{el,check:m.check,solve:m.solve};
+}},
+{id:'fr-spelling',g:0,title:'Écris le mot',desc:'Metti in ordine le lettere per scrivere la parola francese.',glyph:'n·e·z',
+make(L){
+  const mx=[5,7,11][L],mn=[3,4,5][L];
+  const pool=TOPICS.flatMap(t=>t.w).filter(w=>/^[a-zàâçéèêëîïôûùüœ]+$/i.test(w[1])&&w[1].length<=mx&&w[1].length>=mn);
+  const el=h('div');el.append(h('p',{class:'consegna'},'Tocca le lettere nell’ordine giusto per scrivere la parola in francese. Attenzione agli accenti!'));
+  const parts=[];
+  shuffle(pool).slice(0,2).forEach(w=>{const word=w[1];const letters=[...word];let order;do{order=shuffle(letters.map((c,i)=>({c,i})));}while(order.every((o,k)=>o.i===k));
+    let built=[];const out=h('div',{class:'built letters'}),bank=h('div',{class:'bank'});
+    function render(){out.classList.remove('ok','no');out.replaceChildren(...built.map((it,k)=>chipBtn(it.c,()=>{built.splice(k,1);render();},'in')));if(!built.length)out.append(h('span',{class:'ph'},'_ '.repeat(letters.length)));
+      bank.replaceChildren(...order.map(it=>{const c=chipBtn(it.c,()=>{built.push(it);render();});c.disabled=built.includes(it);return c;}));}
+    render();
+    parts.push({check(){const ok=built.map(x=>x.c).join('')===word;out.classList.add(ok?'ok':'no');return ok;},solve(){const used=new Set();built=letters.map(c=>{const it=order.find(o=>o.c===c&&!used.has(o));used.add(it);return it;});render();out.classList.add('ok');}});
+    el.append(h('div',{class:'card',style:'margin-bottom:12px'},h('div',{class:'q',style:'text-transform:none'},emo(w[0],true),h('b',{},w[2]),sayBtn(word)),out,bank));});
+  return{el,check(){return parts.map(p=>p.check()).every(Boolean);},solve(){parts.forEach(p=>p.solve());}};
+}},
+{id:'fr-metiers',g:1,title:'Qui suis-je?',desc:'Leggi che cosa fa e indovina il mestiere in francese.',glyph:'je suis…',
+make(L){
+  const n=[4,5,6][L];const el=h('div');el.append(h('p',{class:'consegna'},'Leggi la frase e scegli il mestiere giusto in francese.'));
+  const grid=h('div',{class:'cmp'});
+  shuffle(METIERS).slice(0,n).forEach(m=>grid.append(h('div',{class:'card'},h('div',{class:'q',style:'text-transform:none'},L===0?emo(m[0]):null,h('span',{},m[5])),choices(wordOpts(m[1].toUpperCase(),METIERS.map(x=>x[1].toUpperCase()),L===2?3:2),m[1].toUpperCase(),'col1'))));
+  el.append(grid);
+  return{el,check:()=>checkAll(el),solve:()=>solveAll(el)};
+}},
+{id:'fr-famille',g:1,title:'Mon père est…',desc:'Famiglia e mestieri: traduci la frase in italiano.',glyph:'ma mère',
+make(L){
+  const n=[2,3,3][L];const el=h('div');el.append(h('p',{class:'consegna'},'Leggi la frase in francese e scegli la traduzione giusta.'));
+  const okF=METIERS.filter(m=>!['agent','chauffeur','pompier','maître nageur','plombier','menuisier','peintre'].includes(m[1]));
+  const it=(f,m)=>{const fem=f[3]==='f';const job=fem?m[4]:m[2];return `${fem?'Mia':'Mio'} ${f[2]} è ${artIt(job,fem)}${job}.`;};
+  const fr=(f,m)=>`${f[3]==='f'?'Ma':'Mon'} ${f[1]} est ${f[3]==='f'?m[3]:m[1]}.`;
+  shuffle(FAMILLE).slice(0,n).forEach(f=>{const pool=f[3]==='f'?okF:METIERS;const m=pick(pool);const good=it(f,m);
+    const others=[it(pick(FAMILLE.filter(x=>x[3]===f[3]&&x!==f)),m),it(f,pick(pool.filter(x=>x!==m))),it(pick(FAMILLE.filter(x=>x[3]===f[3]&&x!==f)),pick(pool.filter(x=>x!==m)))];
+    el.append(h('div',{class:'card',style:'margin-bottom:12px'},h('div',{class:'q',style:'text-transform:none'},emo(f[0]),emo(m[0]),h('b',{class:'enw'},fr(f,m)),sayBtn(fr(f,m))),choices(wordOpts(good,others,L===0?1:2),good,'col1')));});
+  if(L===2){const f=pick(FAMILLE),pool=f[3]==='f'?okF:METIERS,m=pick(pool);const good=fr(f,m);
+    el.append(h('div',{class:'card'},h('div',{class:'q',style:'text-transform:none'},emo(f[0]),emo(m[0]),`Come si dice in francese: «${it(f,m)}»?`),
+      choices(wordOpts(good,[fr(f,pick(pool.filter(x=>x!==m))),fr(pick(FAMILLE.filter(x=>x!==f&&x[3]===f[3])),m),`Je suis ${m[1]}.`],2),good,'col1')));}
+  return{el,check:()=>checkAll(el),solve:()=>solveAll(el)};
+}},
+{id:'fr-journee',g:1,title:'Ma journée',desc:'Le azioni della giornata: mettile in ordine e traducile.',glyph:'⏰ → 😴',
+make(L){
+  const n=[4,6,8][L];const st=rnd(0,ACTIONS.length-n);const win=ACTIONS.slice(st,st+n);
+  const seq=sequencer(win.map(a=>a[1]),txt=>{const a=ACTIONS.find(x=>x[1]===txt);return h('span',{class:'seqtxt'},L===0?emo(a[0]):null,h('span',{},cap1(txt)),sayBtn(txt));});
+  const el=h('div');el.append(h('p',{class:'consegna'},'Che cosa fai durante la giornata? Tocca le azioni nell’ordine in cui le fai: la prima diventa 1, la seconda 2…'),seq.el);
+  const qs=h('div',{class:'cmp',style:'margin-top:14px'});
+  shuffle(win).slice(0,L===0?2:3).forEach(a=>qs.append(h('div',{class:'card'},h('div',{class:'q',style:'text-transform:none'},h('b',{class:'enw'},cap1(a[1])),'significa…'),choices(wordOpts(a[2],ACTIONS.map(x=>x[2]),2),a[2],'col1'))));
+  if(L>0){const m=pick(MOMENTS);qs.append(h('div',{class:'card'},h('div',{class:'q',style:'text-transform:none'},emo(m[0]),'Che parte della giornata è?'),choices(wordOpts(m[1],MOMENTS.map(x=>x[1]),3),m[1],'col1')));}
+  el.append(qs);
+  return{el,check(){const a=seq.check(),b=checkAll(el);return a&&b;},solve(){seq.solve();solveAll(el);}};
+}},
+{id:'fr-maison',g:1,title:'Dans la maison',desc:'Indovinelli sugli oggetti di casa e sulle stanze.',glyph:'🛋️ 🛁',
+make(L){
+  const n=[4,5,6][L];const el=h('div');el.append(h('p',{class:'consegna'},'Leggi l’indovinello e scegli l’oggetto giusto in francese.'));
+  const grid=h('div',{class:'cmp'});
+  shuffle(OBJETS).slice(0,n).forEach(o=>grid.append(h('div',{class:'card'},h('div',{class:'q',style:'text-transform:none'},o[3]),choices(wordOpts(o[1].toUpperCase(),OBJETS.map(x=>x[1].toUpperCase()),L===2?3:2),o[1].toUpperCase(),'col1'))));
+  el.append(grid);
+  if(L>0){const r=pick(PIECES);el.append(h('div',{class:'card',style:'margin-top:12px'},h('div',{class:'q',style:'text-transform:none'},emo(r[0]),`Come si chiama in francese questa stanza: «${r[2]}»?`),choices(wordOpts(r[1],PIECES.map(x=>x[1]),2),r[1],'col1')));}
+  return{el,check:()=>checkAll(el),solve:()=>solveAll(el)};
+}},
+{id:'fr-portrait',g:1,title:'Le portrait',desc:'Guarda il ritratto: com’è? Capelli, occhi, colori.',glyph:'👀 bleus',
+make(L){
+  const n=L===0?1:2;const el=h('div');el.append(h('p',{class:'consegna'},'Guarda il ritratto e scegli la descrizione giusta in francese.'));
+  const grid=h('div',{class:'split'});
+  for(let k=0;k<n;k++){const o={len:pick(['courts','longs']),hair:pick(Object.keys(HAIR)),eyes:pick(Object.keys(EYES)),shirt:pick(['#79aaf7','#f7b3c9','#b9e4c9','#ffe08a'])};
+    const c=h('div',{class:'card',style:'align-items:stretch'},portrait(o));
+    if(L<2){c.append(mcq('Les cheveux sont…',['COURTS','LONGS'],o.len.toUpperCase()),mcq('De quelle couleur sont les cheveux?',wordOpts(o.hair.toUpperCase(),Object.keys(HAIR).map(x=>x.toUpperCase()),L===0?2:3),o.hair.toUpperCase()),
+      mcq('Les yeux sont…',wordOpts(o.eyes.toUpperCase(),Object.keys(EYES).map(x=>x.toUpperCase()),L===0?2:3),o.eyes.toUpperCase()));}
+    else{const sent=(a,b,e)=>`J’ai les cheveux ${a} et ${b} et les yeux ${e}.`;const good=sent(o.len,o.hair,o.eyes);
+      const others=[sent(o.len==='courts'?'longs':'courts',o.hair,o.eyes),sent(o.len,pick(Object.keys(HAIR).filter(x=>x!==o.hair)),o.eyes),sent(o.len,o.hair,pick(Object.keys(EYES).filter(x=>x!==o.eyes)))];
+      c.append(h('div',{class:'q',style:'text-transform:none'},'Quale frase descrive il ritratto?'),choices(wordOpts(good,others,3),good,'col1'));}
+    grid.append(c);}
+  el.append(grid);
+  return{el,check:()=>checkAll(el),solve:()=>solveAll(el)};
+}},
+{id:'fr-lettre',g:1,title:'La lettre',desc:'Leggi la lettera di presentazione e rispondi.',glyph:'Chère Giulia',
+make(L){
+  const[nom,gen]=pick(PRENOMS);const age=rnd(10,15),jour=rnd(1,28),mi=rnd(0,11),ville=pick(CITIES),len=pick(['courts','longs']),hair=pick(['bruns','blonds','roux','châtains','noirs']),eyes=pick(Object.keys(EYES));
+  const[c1,c2]=shuffle(COULEURS.slice(0,9)).slice(0,2);const aime=pick(AIME);const ani=pick(ANIMAUX);const mere=pick(['Giulia','Maria','Laura','Elena']),pere=pick(['Cesare','Paolo','Marco','Andrea']);
+  const sib=pick([['une sœur','elle','sorella'],['un frère','il','fratello']]);const sibN=sib[1]==='elle'?pick(['Gaia','Sofia','Marta']):pick(['Leo','Tommaso','Davide']);
+  const dest=pick(['Giulia','Marie','Paul','Lucas']);
+  const lines=[`${dest==='Paul'||dest==='Lucas'?'Cher':'Chère'} ${dest},`,`Je m’appelle ${nom}. J’ai ${age} ans.`,`Mon anniversaire est le ${jour} ${MOIS[mi][1]}.`,`J’habite à ${ville}.`,`J’ai les cheveux ${len} et ${hair} et les yeux ${eyes}.`,
+    `Mes couleurs préférées sont le ${c1[1]} et le ${c2[1]}.`,`J’aime ${aime[0]}.`,`Mon animal préféré est ${ani[1]}.`,`Ma mère s’appelle ${mere}. Mon père s’appelle ${pere}.`,`J’ai ${sib[0]}, ${sib[1]} s’appelle ${sibN}.`,`À bientôt!`,nom];
+  const HIT={bruns:'castano scuro',blonds:'biondi',roux:'rossi',châtains:'castani',noirs:'neri'},EIT={bleus:'azzurri',verts:'verdi',marron:'marroni',noirs:'neri'};
+  const Q=[['Quanti anni ha '+nom+'?',String(age),[String(age+1),String(age-1),String(age+2)]],['Quando è il suo compleanno?',`Il ${jour} ${MOIS[mi][2]}`,[`Il ${jour} ${MOIS[(mi+1)%12][2]}`,`Il ${(jour%28)+1} ${MOIS[mi][2]}`,`Il ${jour} ${MOIS[(mi+6)%12][2]}`]],
+    ['Dove abita?',ville,CITIES.filter(c=>c!==ville)],['Di che colore ha i capelli?',HIT[hair],Object.values(HIT).filter(x=>x!==HIT[hair])],['Di che colore ha gli occhi?',EIT[eyes],Object.values(EIT).filter(x=>x!==EIT[eyes])],
+    ['Quali sono i suoi colori preferiti?',`${c1[2]} e ${c2[2]}`,[`${c1[2]} e ${pick(COULEURS.filter(x=>x!==c1&&x!==c2))[2]}`,`${pick(COULEURS.filter(x=>x!==c1&&x!==c2))[2]} e ${c2[2]}`]],
+    [`Che cosa ${gen==='f'?'le':'gli'} piace fare?`,aime[1],AIME.map(a=>a[1]).filter(x=>x!==aime[1])],['Qual è il suo animale preferito?',ani[2],ANIMAUX.map(a=>a[2]).filter(x=>x!==ani[2])],
+    ['Come si chiama la mamma?',mere,['Giulia','Maria','Laura','Elena'].filter(x=>x!==mere)],[`Ha un fratello o una sorella?`,`Ha ${sib[2]==='sorella'?'una sorella':'un fratello'}, ${sibN}`,[`Ha ${sib[2]==='sorella'?'un fratello':'una sorella'}, ${sibN}`,'Non ha fratelli']]];
+  const el=h('div');el.append(h('p',{class:'consegna'},'Leggi la lettera e rispondi alle domande. Tocca 🔊 per ascoltarla.'));
+  const letter=h('div',{class:'reading letter'},h('div',{class:'rhead'},h('h2',{},'La lettre'),sayBtn(lines.join(' '))),...lines.map(l=>h('p',{},l)));
+  const right=h('div',{},shuffle(Q).slice(0,[4,6,8][L]).map((q,i)=>mcq((i+1)+'. '+q[0],wordOpts(q[1],q[2],L===2?3:2),q[1])));
+  el.append(h('div',{class:'split'},letter,right));
+  return{el,check:()=>checkAll(el),solve:()=>solveAll(el)};
+}},
+{id:'fr-meteo',g:1,title:'Le temps et le calendrier',desc:'Che tempo fa? Giorni, mesi e parti della giornata.',glyph:'☀️ il fait chaud',
+make(L){
+  const el=h('div');el.append(h('p',{class:'consegna'},'Scegli la frase o la parola giusta in francese.'));
+  const grid=h('div',{class:'cmp'});
+  shuffle(METEO).slice(0,[3,3,4][L]).forEach(m=>grid.append(h('div',{class:'card',style:'align-items:center;text-align:center'},emo(m[0],true),h('div',{class:'q',style:'text-transform:none'},'Quel temps fait-il?'),choices(wordOpts(cap1(m[1]),METEO.map(x=>cap1(x[1])),L===0?2:3),cap1(m[1]),'col1'))));
+  const j=pick(JOURS),mo=pick(MOIS);
+  grid.append(h('div',{class:'card'},h('div',{class:'q',style:'text-transform:none'},`Come si dice «${j[2]}» in francese?`),choices(wordOpts(j[1],JOURS.map(x=>x[1]),L===0?2:3),j[1],'col1')));
+  if(L>0)grid.append(h('div',{class:'card'},h('div',{class:'q',style:'text-transform:none'},h('b',{class:'enw'},mo[1]),sayBtn(mo[1]),'significa…'),choices(wordOpts(mo[2],MOIS.map(x=>x[2]),L===2?3:2),mo[2],'col1')));
+  if(L===2){const k=rnd(0,5);grid.append(h('div',{class:'card'},h('div',{class:'q',style:'text-transform:none'},`Quale giorno viene dopo ${JOURS[k][1]}?`),choices(wordOpts(JOURS[k+1][1],JOURS.map(x=>x[1]).filter(x=>x!==JOURS[k][1]),3),JOURS[k+1][1],'col1')));}
+  el.append(grid);
+  return{el,check:()=>checkAll(el),solve:()=>solveAll(el)};
+}},
+{id:'fr-sante',g:1,title:'Comment tu te sens?',desc:'Come ti senti? Il corpo e la salute.',glyph:'🤒 😷',
+make(L){
+  const el=h('div');el.append(h('p',{class:'consegna'},'Guarda la faccina e scegli come si sente, poi riconosci le parti del corpo.'));
+  const grid=h('div',{class:'cmp'});
+  shuffle(SANTE).slice(0,[2,3,3][L]).forEach(m=>grid.append(h('div',{class:'card',style:'align-items:center;text-align:center'},emo(m[0],true),h('div',{class:'q',style:'text-transform:none'},'Comment tu te sens?'),choices(wordOpts(cap1(m[1])+'!',SANTE.map(x=>cap1(x[1])+'!'),L===0?2:3),cap1(m[1])+'!','col1'))));
+  shuffle(CORPS).slice(0,[2,3,4][L]).forEach(c=>grid.append(h('div',{class:'card',style:'align-items:center;text-align:center'},emo(c[0],true),h('div',{class:'q',style:'text-transform:none'},'Comment ça s’appelle?'),choices(wordOpts(c[1],CORPS.map(x=>x[1]),L===0?2:3),c[1],'col1'))));
+  el.append(grid);
+  return{el,check:()=>checkAll(el),solve:()=>solveAll(el)};
+}},
+{id:'fr-france',g:2,title:'La France',desc:'I simboli della Repubblica francese: bandiera, moneta, lingua, presidente.',glyph:'🇫🇷',
+make(L){
+  const Q=[['Di che colori è la bandiera francese (le drapeau)?','Blu, bianco e rosso',['Verde, bianco e rosso','Rosso e bianco','Blu e giallo']],['Qual è la moneta della Francia (la monnaie)?','L’euro',['La sterlina','Il dollaro','Il franco svizzero']],
+    ['Qual è la lingua nazionale della Francia?','Il francese',['L’inglese','Lo spagnolo','Il tedesco']],['Chi è il presidente della Repubblica francese (novembre 2026)?','Emmanuel Macron',['Napoleone Bonaparte','Charles de Gaulle','Re Carlo III']],
+    ['Qual è la capitale della Francia?','Parigi',['Lione','Marsiglia','Nizza']],['Come si chiama l’inno nazionale francese?','La Marseillaise',['Fratelli d’Italia','God Save the King','Inno alla gioia']],
+    ['Come si chiama la figura femminile simbolo della Repubblica francese?','Marianne',['Giovanna','Elisabetta','Giulia']],['«Le drapeau français est bleu-blanc-rouge» significa…','La bandiera francese è blu, bianca e rossa',['La bandiera italiana è verde, bianca e rossa','Il cielo francese è blu','La casa francese è bianca']]];
+  const el=h('div');el.append(h('p',{class:'consegna'},'Segna la risposta corretta, poi collega le parole francesi alla traduzione.'));
+  el.append(h('div',{class:'flagfr','aria-hidden':'true'},h('i',{style:'background:#1f4fb5'}),h('i',{style:'background:#fff'}),h('i',{style:'background:#d6333c'})));
+  const grid=h('div',{class:'cmp'});shuffle(Q).slice(0,[3,4,6][L]).forEach(q=>grid.append(h('div',{class:'card'},mcq(q[0],wordOpts(q[1],q[2],L===2?3:2),q[1]))));el.append(grid);
+  const V=[['France','Francia'],['drapeau','bandiera'],['monnaie','moneta'],['langue','lingua'],['président','presidente'],['république','repubblica'],['bleu','blu'],['blanc','bianco'],['rouge','rosso']];
+  const m=matcher(shuffle(V).slice(0,[3,4,5][L]));el.append(h('div',{class:'kicker',style:'margin:16px 0 8px'},'Collega le parole'),m.el);
+  return{el,check(){const a=checkAll(el),b=m.check();return a&&b;},solve(){solveAll(el);m.solve();}};
+}}
+];
+
+/* ---------- collegamento a Supabase ---------- */
+const SB_URL='https://dginlwxxuuinvpyhsyfa.supabase.co';
+const SB_KEY='sb_publishable_QZC4rmwQcjr7-yVXHMshwA_IKNYLqZl';
+async function rpc(fn,args){
+  let r;
+  try{r=await fetch(`${SB_URL}/rest/v1/rpc/${fn}`,{method:'POST',headers:{'Content-Type':'application/json',apikey:SB_KEY},body:JSON.stringify(args)});}
+  catch(e){const err=new Error('Nessuna connessione a Internet. Riprova tra poco.');err.offline=true;throw err;}
+  const t=await r.text();let j=null;try{j=t?JSON.parse(t):null;}catch(e){}
+  if(!r.ok)throw new Error((j&&j.message)||'Errore del server ('+r.status+')');
+  return j;
+}
+
+/* ---------- app ---------- */
+let level=load('level',0),cur=null,curEx=null;
+let sess=load('sess',null);            // {token,nome,classe,codice,stelle} oppure {guest:true}
+const SUBJ='francese';
+const guestStars=()=>load('stars-'+SUBJ,SUBJ==='matematica'?load('stars',0):0);
+let stars=sess&&sess.token?((sess.per&&sess.per[SUBJ])||0):guestStars();
+let queue=load('queue',[]);
+let teacher=null;                       // {codice,pin} solo in memoria
+const $=id=>document.getElementById(id);
+const view=$('view'),dock=$('dock'),fb=$('fb'),keypad=$('keypad');
+const LV=['Facile','Medio','Difficile'];
+LV.forEach((t,i)=>{const b=h('button',{type:'button','aria-pressed':String(i===level)},t);b.addEventListener('click',()=>{level=i;save('level',i);[...$('levels').children].forEach((x,j)=>x.setAttribute('aria-pressed',String(j===i)));if(curEx){leaveEx();newEx();}});$('levels').append(b);});
+[['1'],['2'],['3'],['4'],['5'],['6'],['7'],['8'],['9'],['0'],['comma',','],['neg','−'],['back','⌫']].forEach(([k,t])=>{const b=h('button',{type:'button','aria-label':k==='neg'?'segno meno':k==='back'?'cancella':k==='comma'?'virgola':k},t||k);b.addEventListener('click',()=>keyPress(k));keypad.append(b);});
+function showStars(){$('stars').textContent='★ '+stars;}
+function popStars(){const st=$('stars');st.classList.remove('pop');void st.offsetWidth;st.classList.add('pop');}
+function setSess(s){sess=s;save('sess',s);}
+function showHeader(mode){ // 'app' | 'login' | 'teacher'
+  $('hub').hidden=!$('back').hidden;
+  $('levels').hidden=mode!=='app';$('stars').hidden=mode!=='app';
+  $('who').hidden=mode!=='teacher';
+  if(mode==='teacher')$('who').textContent='Esci da insegnante';
+  showStars();
+}
+$('back').addEventListener('click',()=>{location.hash='';});
+$('who').addEventListener('click',()=>{
+  if(location.hash==='#insegnante'){teacher=null;location.hash='';return;}
+  leaveEx();setSess(null);stars=guestStars();location.hash='';route();
+});
+
+/* ---------- salvataggio dei risultati (con coda se manca la rete) ---------- */
+function record(corretto,soluzione){
+  if(!cur||cur.saved||!sess||!sess.token)return;cur.saved=true;
+  queue.push({p_token:sess.token,p_esercizio:curEx.id,p_livello:level,p_corretto:corretto,p_soluzione:soluzione});save('queue',queue);flush();
+}
+let flushing=false;
+async function flush(){
+  if(flushing||!queue.length||!sess||!sess.token)return;flushing=true;
+  try{while(queue.length){const it=queue[0];
+      try{const st=await rpc('qm_salva',it);if(it.p_token===sess.token&&typeof st==='number'){sess.stelle=st;save('sess',sess);}}
+      catch(e){if(e.offline)break;if(/scaduto/.test(e.message)){queue.shift();save('queue',queue);setSess(null);location.hash='';route();break;}}
+      queue.shift();save('queue',queue);}}
+  finally{flushing=false;}
+  refreshStars();
+}
+window.addEventListener('online',flush);
+async function refreshStars(){if(!sess||!sess.token)return;try{const r=await rpc('qm_stelle',{p_token:sess.token});if(r&&sess&&sess.token){sess.per=r;sess.stelle=r.totale;save('sess',sess);if(!queue.length){stars=r[SUBJ]||0;showStars();}}}catch(e){}}
+function leaveEx(){if(cur&&!cur.saved&&cur.wrong)record(false,false);}
+
+/* ---------- accesso ---------- */
+function field(id,label,attrs){return h('label',{class:'fld',for:id},h('span',{},label),h('input',{id,...attrs}));}
+function loginView(){
+  curEx=null;cur=null;dock.hidden=true;$('back').hidden=true;showHeader('login');
+  const err1=h('p',{class:'err',role:'alert'}),err2=h('p',{class:'err',role:'alert'}),err3=h('p',{class:'err',role:'alert'});
+  const fStud=h('form',{class:'card login'},h('h2',{},'Sono un alunno'),
+    field('l-cod','Codice della classe',{autocomplete:'off',autocapitalize:'characters',spellcheck:'false',maxlength:'6',required:true,value:load('ultimoCodice','')}),
+    field('l-nome','Il tuo nome',{autocomplete:'off',maxlength:'40',required:true}),
+    h('button',{class:'btn primary',type:'submit'},'Entra'),err1);
+  fStud.addEventListener('submit',async e=>{e.preventDefault();err1.textContent='Un momento…';
+    try{const r=await rpc('qm_entra',{p_codice:$('l-cod').value,p_nome:$('l-nome').value});save('ultimoCodice',r.codice);setSess(r);stars=0;err1.textContent='';flush();route();refreshStars();}
+    catch(x){err1.textContent=x.message;}});
+  const fNew=h('form',{class:'card login'},h('h2',{},'Sono l’insegnante'),h('h3',{},'Crea una classe'),
+    field('t-nome','Nome della classe (es. 3ª B)',{autocomplete:'off',maxlength:'60',required:true}),
+    field('t-pin','Scegli un PIN di 4–8 cifre',{inputmode:'numeric',pattern:'[0-9]{4,8}',maxlength:'8',required:true,autocomplete:'off',type:'password'}),
+    h('button',{class:'btn',type:'submit'},'Crea la classe'),err2);
+  fNew.addEventListener('submit',async e=>{e.preventDefault();err2.textContent='Un momento…';
+    try{const pin=$('t-pin').value;const c=await rpc('qm_crea_classe',{p_nome:$('t-nome').value,p_pin:pin});teacher={codice:c,pin};save('ultimoCodice',c);location.hash='insegnante';}
+    catch(x){err2.textContent=x.message;}});
+  const fRep=h('form',{class:'card login'},h('h3',{},'Vedi i progressi della classe'),
+    field('r-cod','Codice della classe',{autocomplete:'off',autocapitalize:'characters',spellcheck:'false',maxlength:'6',required:true,value:load('ultimoCodice','')}),
+    field('r-pin','PIN',{inputmode:'numeric',maxlength:'8',required:true,autocomplete:'off',type:'password'}),
+    h('button',{class:'btn',type:'submit'},'Apri i progressi'),err3);
+  fRep.addEventListener('submit',async e=>{e.preventDefault();err3.textContent='Un momento…';
+    const t={codice:$('r-cod').value.trim().toUpperCase(),pin:$('r-pin').value};
+    try{await rpc('qm_report',{p_codice:t.codice,p_pin:t.pin});teacher=t;save('ultimoCodice',t.codice);location.hash='insegnante';}
+    catch(x){err3.textContent=x.message;}});
+  const guest=h('button',{class:'linkbtn',type:'button',onclick:()=>{setSess({guest:true});stars=guestStars();route();}},'Prova senza salvare i risultati');
+  view.replaceChildren(h('div',{class:'loginwrap'},
+    h('div',{},h('h1',{class:'hero'},'Quaderno di francese'),h('p',{class:'intro'},'Parole, frasi e civiltà in francese, con la pronuncia da ascoltare. Entra con il codice che ti ha dato l’insegnante: i tuoi esercizi e le tue stelle restano salvati su ogni dispositivo.')),
+    h('div',{class:'logingrid'},fStud,h('div',{class:'stack'},fNew,fRep)),guest));
+  $('main').scrollTop=0;
+}
+
+/* ---------- pagina insegnante ---------- */
+const OTHER_TITLES={"divisione": "Matematica · Divisione per raggruppare", "incroci": "Matematica · Moltiplicazione con gli incroci", "retta": "Matematica · Sulla retta dei numeri", "confronta": "Matematica · Confronta i numeri", "piu-grande": "Matematica · Il numero più grande", "codice": "Matematica · Il codice segreto", "frazioni": "Matematica · Colora la frazione", "piano": "Matematica · Il piano cartesiano", "collega": "Matematica · Collega figure e nomi", "lati": "Matematica · Lati, vertici e angoli", "prima-dopo": "Matematica · Prima e dopo", "conta": "Matematica · Conta, aggiungi e togli", "monomi": "Matematica · Monomi simili", "area-quadretti": "Matematica · Area in quadretti", "perimetro-area": "Matematica · Perimetro e area", "pitagora": "Matematica · Teorema di Pitagora", "triangoli": "Matematica · Che triangolo è?", "angoli": "Matematica · Che angolo è?", "puntini": "Matematica · Unisci i puntini", "parti-cerchio": "Matematica · Le parti della circonferenza", "cerchio-misure": "Matematica · Raggio, diametro e lunghezza", "posizione-circonferenze": "Matematica · Posizione di due circonferenze", "inscritti": "Matematica · Poligoni inscritti", "solidi": "Matematica · I solidi", "conta-soldi": "Matematica · Conta i soldi", "monete-banconote": "Matematica · Monete e banconote", "paga-giusto": "Matematica · Paga il prezzo giusto", "resto": "Matematica · Il resto", "cambi": "Matematica · I cambi", "volantino": "Matematica · Il volantino della spesa", "problemi-euro": "Matematica · Problemi con l’euro", "ita-comprensione": "Italiano · Leggi e rispondi", "ita-vero-falso": "Italiano · La risposta è giusta?", "ita-sequenza": "Italiano · Metti in ordine la storia", "ita-completa": "Italiano · Completa il testo", "ita-parole": "Italiano · Che cosa vuol dire?", "ita-riordina": "Italiano · Riordina la frase", "ita-nomi-verbi": "Italiano · Nomi, verbi e articoli", "eng-vocab": "Inglese · Words and pictures", "eng-traduci": "Inglese · Translate the word", "eng-collega": "Inglese · Match the words", "eng-spelling": "Inglese · Spell the word", "eng-jobs": "Inglese · Who am I?", "eng-dove": "Inglese · Where can you go?", "eng-right-left": "Inglese · Right or left?", "eng-family": "Inglese · My family", "eng-free-time": "Inglese · In my free time I like…", "eng-colours": "Inglese · What colour is it?", "eng-holidays": "Inglese · My summer holidays", "eng-civilta": "Inglese · Civiltà"};
+const exTitle=id=>(EX.find(e=>e.id===id)||{title:OTHER_TITLES[id]||id}).title;
+const when=d=>d?new Date(d).toLocaleString('it-IT',{day:'2-digit',month:'short',hour:'2-digit',minute:'2-digit'}):'—';
+async function teacherView(){
+  curEx=null;cur=null;dock.hidden=true;$('back').hidden=false;showHeader('teacher');
+  if(!teacher){loginView();return;}
+  view.replaceChildren(h('p',{class:'intro'},'Carico i progressi…'));
+  let rep;try{rep=await rpc('qm_report',{p_codice:teacher.codice,p_pin:teacher.pin});}
+  catch(x){view.replaceChildren(h('p',{class:'err'},x.message),h('button',{class:'btn',type:'button',onclick:teacherView},'Riprova'));return;}
+  const al=rep.alunni||[];
+  const tot=al.reduce((a,x)=>a+x.tentativi,0),ok=al.reduce((a,x)=>a+x.corretti,0);
+  const head=h('div',{class:'sheet'},h('div',{class:'kicker'},'Pagina insegnante'),h('h1',{},rep.classe),
+    h('div',{class:'codebox'},h('span',{},'Codice da dare agli alunni'),h('b',{},rep.codice)),
+    h('div',{class:'kpis'},h('div',{},h('b',{},String(al.length)),h('span',{},'alunni')),h('div',{},h('b',{},String(tot)),h('span',{},'esercizi svolti')),h('div',{},h('b',{},tot?Math.round(ok/tot*100)+'%':'—'),h('span',{},'risolti da soli'))),
+    h('button',{class:'btn',type:'button',onclick:teacherView},'Aggiorna'));
+  const list=h('div',{class:'sheet',style:'margin-top:16px'});
+  if(!al.length)list.append(h('p',{class:'intro'},`Nessun alunno ancora. Gli alunni entrano scegliendo «Sono un alunno» e scrivendo il codice ${rep.codice} e il proprio nome.`));
+  else{const tb=h('table',{class:'rep'},h('thead',{},h('tr',{},h('th',{},'Alunno'),h('th',{},'★'),h('th',{},'Esercizi'),h('th',{},'Risolti da soli'),h('th',{},'Ultimo accesso'),h('th',{},''))));
+    const body=h('tbody');tb.append(body);
+    al.forEach(a=>{const pct=a.tentativi?Math.round(a.corretti/a.tentativi*100):null;
+      const det=h('tr',{class:'det',hidden:true},h('td',{colspan:'6'}));
+      const btn=h('button',{class:'ghost',type:'button'},'Dettagli');
+      btn.addEventListener('click',()=>{det.hidden=!det.hidden;btn.textContent=det.hidden?'Dettagli':'Chiudi';});
+      body.append(h('tr',{},h('td',{},h('b',{},a.nome)),h('td',{class:'n'},String(a.stelle)),h('td',{class:'n'},String(a.tentativi)),
+        h('td',{},pct==null?'—':h('span',{class:'bar'},h('i',{style:`width:${pct}%`}),h('em',{},pct+'%'))),h('td',{},when(a.ultimo_accesso)),h('td',{},btn)),det);
+      const inner=h('div',{class:'detbox'});
+      if(a.esercizi.length){const t2=h('table',{class:'rep small'},h('thead',{},h('tr',{},h('th',{},'Esercizio'),h('th',{},'Svolti'),h('th',{},'Risolti da soli'),h('th',{},'Soluzione vista'),h('th',{},'Ultima volta'))));
+        const b2=h('tbody');a.esercizi.forEach(e=>b2.append(h('tr',{},h('td',{},exTitle(e.esercizio)),h('td',{class:'n'},String(e.tentativi)),h('td',{class:'n'},String(e.corretti)),h('td',{class:'n'},String(e.soluzioni)),h('td',{},when(e.ultimo)))));t2.append(b2);inner.append(t2);}
+      else inner.append(h('p',{},'Nessun esercizio svolto.'));
+      const del=h('button',{class:'ghost danger',type:'button'},'Elimina alunno');let armed=false;
+      del.addEventListener('click',async()=>{if(!armed){armed=true;del.textContent=`Conferma: elimina ${a.nome} e i suoi risultati`;return;}
+        try{await rpc('qm_elimina_alunno',{p_codice:teacher.codice,p_pin:teacher.pin,p_alunno:a.id});teacherView();}catch(x){del.textContent=x.message;}});
+      inner.append(del);det.firstChild.append(inner);});
+    list.append(h('div',{class:'tablewrap'},tb));}
+  view.replaceChildren(head,list);
+}
+
+/* ---------- indice ed esercizi ---------- */
+function home(){curEx=null;cur=null;active=null;dock.hidden=true;$('back').hidden=true;showHeader('app');
+  view.replaceChildren(h('p',{class:'intro'},(sess&&sess.token?`Ciao ${sess.nome}! `:'')+'Scegli un esercizio. Ogni volta che premi «Nuovo esercizio» ne viene creato uno diverso. Il livello in alto cambia la difficoltà.'),
+    ...GROUPS.map((g,gi)=>h('section',{class:'group'},h('h2',{},g),h('div',{class:'tiles'},EX.filter(e=>e.g===gi).map(e=>h('button',{type:'button',class:'tile',onclick:()=>{location.hash=e.id;}},h('span',{class:'glyph'},e.glyph),h('b',{},e.title),h('span',{},e.desc)))))));
+  $('main').scrollTop=0;}
+let area;
+function openEx(ex){curEx=ex;$('back').hidden=false;dock.hidden=false;showHeader('app');area=h('div');
+  view.replaceChildren(h('div',{class:'sheet'},h('div',{class:'kicker'},GROUPS[ex.g]),h('h1',{},ex.title),area));newEx();}
+function newEx(){active=null;cur=curEx.make(level);cur.solved=false;cur.shown=false;cur.wrong=false;cur.saved=false;area.replaceChildren(cur.el);
+  const hasSlots=!!cur.el.querySelector('.slot');keypad.hidden=!hasSlots;setFb('','');
+  if(hasSlots){const f=cur.el.querySelector('.slot');if(f)focusSlot(f);}$('main').scrollTop=0;}
+function setFb(t,c){fb.textContent=t;fb.className='fb '+c;}
+$('bNew').addEventListener('click',()=>{leaveEx();newEx();});
+$('bSol').addEventListener('click',()=>{if(!cur)return;cur.solve();if(!cur.solved){cur.shown=true;record(false,true);}setFb('Ecco la soluzione. Prova con un nuovo esercizio!','info');});
+$('bChk').addEventListener('click',doCheck);
+function doCheck(){if(!cur)return;const ok=cur.check();
+  if(ok){const fresh=!cur.solved&&!cur.shown;setFb(pick(['Bravo!','Ottimo lavoro!','Perfetto!','Esatto!','Che campione!'])+(fresh?' +1 ★':''),'ok');
+    if(fresh){stars++;if(!(sess&&sess.token))save('stars-'+SUBJ,stars);showStars();popStars();record(true,false);}cur.solved=true;}
+  else{cur.wrong=true;setFb('Quasi! Controlla le parti in rosso e riprova.','no');}}
+document.addEventListener('keydown',e=>{if(!curEx||e.target.tagName==='INPUT')return;if(/^[0-9]$/.test(e.key))keyPress(e.key);else if(e.key==='-')keyPress('neg');else if(e.key===','||e.key==='.')keyPress('comma');else if(e.key==='Backspace'){e.preventDefault();keyPress('back');}else if(e.key==='Enter'){e.preventDefault();doCheck();}});
+function route(){
+  const hs=location.hash.slice(1);
+  if(curEx&&EX.find(e=>e.id===hs)!==curEx)leaveEx();
+  if(hs==='insegnante')return teacherView();
+  if(!sess)return loginView();
+  const ex=EX.find(e=>e.id===hs);ex?openEx(ex):home();
+}
+window.addEventListener('hashchange',route);route();flush();refreshStars();
+window.addEventListener('pagehide',leaveEx);
+if('serviceWorker' in navigator&&location.protocol==='https:')navigator.serviceWorker.register('../sw.js',{scope:'../'}).catch(()=>{});
+</script>
+</body>
+</html>
