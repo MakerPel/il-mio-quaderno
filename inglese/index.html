@@ -589,7 +589,9 @@ async function rpc(fn,args){
 /* ---------- app ---------- */
 let level=load('level',0),cur=null,curEx=null;
 let sess=load('sess',null);            // {token,nome,classe,codice,stelle} oppure {guest:true}
-let stars=sess&&sess.token?(sess.stelle||0):load('stars',0);
+const SUBJ='inglese';
+const guestStars=()=>load('stars-'+SUBJ,SUBJ==='matematica'?load('stars',0):0);
+let stars=sess&&sess.token?((sess.per&&sess.per[SUBJ])||0):guestStars();
 let queue=load('queue',[]);
 let teacher=null;                       // {codice,pin} solo in memoria
 const $=id=>document.getElementById(id);
@@ -611,7 +613,7 @@ function showHeader(mode){ // 'app' | 'login' | 'teacher'
 $('back').addEventListener('click',()=>{location.hash='';});
 $('who').addEventListener('click',()=>{
   if(location.hash==='#insegnante'){teacher=null;location.hash='';return;}
-  leaveEx();setSess(null);stars=load('stars',0);location.hash='';route();
+  leaveEx();setSess(null);stars=guestStars();location.hash='';route();
 });
 
 /* ---------- salvataggio dei risultati (con coda se manca la rete) ---------- */
@@ -623,12 +625,14 @@ let flushing=false;
 async function flush(){
   if(flushing||!queue.length||!sess||!sess.token)return;flushing=true;
   try{while(queue.length){const it=queue[0];
-      try{const st=await rpc('qm_salva',it);if(it.p_token===sess.token&&typeof st==='number'){stars=st;sess.stelle=st;save('sess',sess);showStars();}}
+      try{const st=await rpc('qm_salva',it);if(it.p_token===sess.token&&typeof st==='number'){sess.stelle=st;save('sess',sess);}}
       catch(e){if(e.offline)break;if(/scaduto/.test(e.message)){queue.shift();save('queue',queue);setSess(null);location.hash='';route();break;}}
       queue.shift();save('queue',queue);}}
   finally{flushing=false;}
+  refreshStars();
 }
 window.addEventListener('online',flush);
+async function refreshStars(){if(!sess||!sess.token)return;try{const r=await rpc('qm_stelle',{p_token:sess.token});if(r&&sess&&sess.token){sess.per=r;sess.stelle=r.totale;save('sess',sess);if(!queue.length){stars=r[SUBJ]||0;showStars();}}}catch(e){}}
 function leaveEx(){if(cur&&!cur.saved&&cur.wrong)record(false,false);}
 
 /* ---------- accesso ---------- */
@@ -641,7 +645,7 @@ function loginView(){
     field('l-nome','Il tuo nome',{autocomplete:'off',maxlength:'40',required:true}),
     h('button',{class:'btn primary',type:'submit'},'Entra'),err1);
   fStud.addEventListener('submit',async e=>{e.preventDefault();err1.textContent='Un momento…';
-    try{const r=await rpc('qm_entra',{p_codice:$('l-cod').value,p_nome:$('l-nome').value});save('ultimoCodice',r.codice);setSess(r);stars=r.stelle||0;err1.textContent='';flush();route();}
+    try{const r=await rpc('qm_entra',{p_codice:$('l-cod').value,p_nome:$('l-nome').value});save('ultimoCodice',r.codice);setSess(r);stars=0;err1.textContent='';flush();route();refreshStars();}
     catch(x){err1.textContent=x.message;}});
   const fNew=h('form',{class:'card login'},h('h2',{},'Sono l’insegnante'),h('h3',{},'Crea una classe'),
     field('t-nome','Nome della classe (es. 3ª B)',{autocomplete:'off',maxlength:'60',required:true}),
@@ -658,7 +662,7 @@ function loginView(){
     const t={codice:$('r-cod').value.trim().toUpperCase(),pin:$('r-pin').value};
     try{await rpc('qm_report',{p_codice:t.codice,p_pin:t.pin});teacher=t;save('ultimoCodice',t.codice);location.hash='insegnante';}
     catch(x){err3.textContent=x.message;}});
-  const guest=h('button',{class:'linkbtn',type:'button',onclick:()=>{setSess({guest:true});stars=load('stars',0);route();}},'Prova senza salvare i risultati');
+  const guest=h('button',{class:'linkbtn',type:'button',onclick:()=>{setSess({guest:true});stars=guestStars();route();}},'Prova senza salvare i risultati');
   view.replaceChildren(h('div',{class:'loginwrap'},
     h('div',{},h('h1',{class:'hero'},'Quaderno di inglese'),h('p',{class:'intro'},'Parole, frasi e civiltà in inglese, con la pronuncia da ascoltare. Entra con il codice che ti ha dato l’insegnante: i tuoi esercizi e le tue stelle restano salvati su ogni dispositivo.')),
     h('div',{class:'logingrid'},fStud,h('div',{class:'stack'},fNew,fRep)),guest));
@@ -720,7 +724,7 @@ $('bSol').addEventListener('click',()=>{if(!cur)return;cur.solve();if(!cur.solve
 $('bChk').addEventListener('click',doCheck);
 function doCheck(){if(!cur)return;const ok=cur.check();
   if(ok){const fresh=!cur.solved&&!cur.shown;setFb(pick(['Bravo!','Ottimo lavoro!','Perfetto!','Esatto!','Che campione!'])+(fresh?' +1 ★':''),'ok');
-    if(fresh){stars++;if(!(sess&&sess.token))save('stars',stars);showStars();popStars();record(true,false);}cur.solved=true;}
+    if(fresh){stars++;if(!(sess&&sess.token))save('stars-'+SUBJ,stars);showStars();popStars();record(true,false);}cur.solved=true;}
   else{cur.wrong=true;setFb('Quasi! Controlla le parti in rosso e riprova.','no');}}
 document.addEventListener('keydown',e=>{if(!curEx||e.target.tagName==='INPUT')return;if(/^[0-9]$/.test(e.key))keyPress(e.key);else if(e.key==='-')keyPress('neg');else if(e.key===','||e.key==='.')keyPress('comma');else if(e.key==='Backspace'){e.preventDefault();keyPress('back');}else if(e.key==='Enter'){e.preventDefault();doCheck();}});
 function route(){
@@ -730,7 +734,7 @@ function route(){
   if(!sess)return loginView();
   const ex=EX.find(e=>e.id===hs);ex?openEx(ex):home();
 }
-window.addEventListener('hashchange',route);route();flush();
+window.addEventListener('hashchange',route);route();flush();refreshStars();
 window.addEventListener('pagehide',leaveEx);
 if('serviceWorker' in navigator&&location.protocol==='https:')navigator.serviceWorker.register('../sw.js',{scope:'../'}).catch(()=>{});
 </script>

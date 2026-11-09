@@ -71,7 +71,7 @@ h2{font-family:var(--display);font-size:20px;margin:0;color:var(--muted);text-tr
         <b>Quaderno di matematica</b>
         <div class="sym" aria-hidden="true"><i style="color:#2a64d4">+</i><i style="color:#d6336c">−</i><i style="color:#2b9348">×</i><i style="color:#b8650b">:</i></div>
         <span class="d">Numeri, numeri relativi e monomi, frazioni e aree, geometria, cerchio, solidi e l’euro: 31 tipi di esercizi.</span>
-        <span class="stars" id="stars" hidden></span>
+        <span class="stars" id="stars-matematica" hidden></span>
         <span class="go">Apri il quaderno ›</span>
       </a>
       <a class="subject" href="italiano/">
@@ -79,6 +79,7 @@ h2{font-family:var(--display);font-size:20px;margin:0;color:var(--muted);text-tr
         <b>Quaderno di italiano</b>
         <div class="sym" aria-hidden="true"><i style="color:#d6336c">A</i><i style="color:#2a64d4">b</i><i style="color:#2b9348">c</i><i>📖</i></div>
         <span class="d">Brani da leggere e ascoltare, domande di comprensione, parole, frasi da riordinare, nomi e verbi: 7 tipi di esercizi.</span>
+        <span class="stars" id="stars-italiano" hidden></span>
         <span class="go" style="color:#d6336c">Apri il quaderno ›</span>
       </a>
       <a class="subject" href="inglese/">
@@ -86,6 +87,7 @@ h2{font-family:var(--display);font-size:20px;margin:0;color:var(--muted);text-tr
         <b>Quaderno di inglese</b>
         <div class="sym" aria-hidden="true"><i>🇬🇧</i><i>🏥</i><i>⚽</i><i>🦃</i></div>
         <span class="d">Parole con i disegni e la pronuncia, lavori, luoghi della città, right e left, tempo libero, vacanze, famiglia e civiltà: 12 tipi di esercizi.</span>
+        <span class="stars" id="stars-inglese" hidden></span>
         <span class="go" style="color:#2b9348">Apri il quaderno ›</span>
       </a>
     </div>
@@ -93,11 +95,21 @@ h2{font-family:var(--display);font-size:20px;margin:0;color:var(--muted);text-tr
   <p class="howto"><b>Per averlo sull’iPad:</b> apri questa pagina in Safari, tocca <b>Condividi</b> e poi <b>Aggiungi alla schermata Home</b>.</p>
 </main>
 <script>
-try{
-  const s=JSON.parse(localStorage.getItem('qm-sess')||'null');
-  if(s&&s.token){const h=document.getElementById('hello');h.textContent=`Ciao ${s.nome}!`;h.hidden=false;
-    const st=document.getElementById('stars');st.textContent=`★ ${s.stelle||0} stelle`;st.hidden=false;}
-}catch(e){}
+const SB_URL='https://dginlwxxuuinvpyhsyfa.supabase.co',SB_KEY='sb_publishable_QZC4rmwQcjr7-yVXHMshwA_IKNYLqZl';
+const SUBJS=['matematica','italiano','inglese'];
+function ld(k,d){try{const v=localStorage.getItem('qm-'+k);return v==null?d:JSON.parse(v);}catch(e){return d;}}
+function show(per,tot,nome){
+  SUBJS.forEach(s=>{const el=document.getElementById('stars-'+s);if(!el)return;const n=per[s]||0;el.textContent=`★ ${n} ${n===1?'stella':'stelle'}`;el.hidden=false;});
+  const h=document.getElementById('hello');h.textContent=(nome?`Ciao ${nome}! `:'')+`Hai ${tot} ${tot===1?'stella':'stelle'} in tutto.`;h.hidden=false;}
+const s=ld('sess',null);
+if(s&&s.token){
+  const per=s.per||{};show(per,s.per?s.per.totale:(s.stelle||0),s.nome);
+  fetch(SB_URL+'/rest/v1/rpc/qm_stelle',{method:'POST',headers:{'Content-Type':'application/json',apikey:SB_KEY},body:JSON.stringify({p_token:s.token})})
+    .then(r=>r.ok?r.json():null).then(r=>{if(!r)return;s.per=r;s.stelle=r.totale;try{localStorage.setItem('qm-sess',JSON.stringify(s));}catch(e){}show(r,r.totale,s.nome);}).catch(()=>{});
+}else if(s&&s.guest){
+  const per={matematica:ld('stars-matematica',ld('stars',0)),italiano:ld('stars-italiano',0),inglese:ld('stars-inglese',0)};
+  show(per,per.matematica+per.italiano+per.inglese,'');
+}
 if('serviceWorker' in navigator&&location.protocol==='https:')navigator.serviceWorker.register('./sw.js').catch(()=>{});
 </script>
 </body>
