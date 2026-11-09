@@ -38,6 +38,7 @@ main{max-width:980px;margin:0 auto;padding:max(24px,env(safe-area-inset-top)) ma
 .userbar[hidden]{display:none}
 .who{font-family:var(--body);font-weight:700;font-size:16px;border:2px solid var(--line);background:var(--card);border-radius:12px;min-height:46px;padding:0 16px;color:var(--ink);cursor:pointer;text-decoration:none;display:inline-flex;align-items:center}
 .who[hidden]{display:none}
+.btns{display:flex;gap:10px;flex-wrap:wrap;margin-left:auto}
 .who:focus-visible{outline:3px solid var(--blue);outline-offset:2px}
 .who.go-in{background:var(--blue);border-color:var(--blue);color:#fff}
 .hello{font-family:var(--display);font-weight:800;font-size:22px;margin:0}
@@ -68,7 +69,7 @@ h2{font-family:var(--display);font-size:20px;margin:0;color:var(--muted);text-tr
       <p>Scegli la materia e fai gli esercizi: ogni volta sono diversi.</p>
     </div>
   </header>
-  <div class="userbar" id="userbar"><p class="hello" id="hello" hidden></p><button class="who" id="who" type="button" hidden></button><a class="who go-in" id="enter" href="matematica/" hidden>Entra con il codice della classe</a></div>
+  <div class="userbar" id="userbar"><p class="hello" id="hello" hidden></p><span class="btns"><button class="who" id="who" type="button" hidden></button><a class="who go-in" id="enter" href="matematica/" hidden>Entra con il codice della classe</a><a class="who" id="teach" href="matematica/#insegnante">👩‍🏫 Insegnante</a></span></div>
   <section aria-labelledby="mat">
     <h2 id="mat" style="margin-bottom:12px">Le materie</h2>
     <div class="subjects">

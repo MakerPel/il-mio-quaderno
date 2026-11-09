@@ -167,6 +167,7 @@ svg.board{width:100%;height:auto;display:block;touch-action:manipulation}
 .who{font-size:15px;white-space:pre}
 .loginwrap{display:flex;flex-direction:column;gap:18px;max-width:900px;margin:0 auto}
 .hero{font-family:var(--display);font-size:clamp(30px,5vw,44px);line-height:1.05;margin:8px 0 4px;text-wrap:balance}
+.logingrid.one{grid-template-columns:minmax(0,520px)}
 .logingrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:16px;align-items:start}
 .stack{display:flex;flex-direction:column;gap:16px}
 .login{background:var(--card);border:2px solid var(--line);box-shadow:0 4px 0 var(--line);gap:12px;padding:20px}
@@ -1116,7 +1117,7 @@ function showHeader(mode){ // 'app' | 'login' | 'teacher'
 }
 $('back').addEventListener('click',()=>{location.hash='';});
 $('who').addEventListener('click',()=>{
-  if(location.hash==='#insegnante'){teacher=null;location.hash='';return;}
+  if(location.hash==='#insegnante'){teacher=null;location.href='../';return;}
   leaveEx();setSess(null);stars=guestStars();location.hash='';route();
 });
 
@@ -1141,7 +1142,8 @@ function leaveEx(){if(cur&&!cur.saved&&cur.wrong)record(false,false);}
 
 /* ---------- accesso ---------- */
 function field(id,label,attrs){return h('label',{class:'fld',for:id},h('span',{},label),h('input',{id,...attrs}));}
-function loginView(){
+function goTeacher(){if(location.hash==='#insegnante')teacherView();else location.hash='insegnante';}
+function loginView(mode){
   curEx=null;cur=null;dock.hidden=true;$('back').hidden=true;showHeader('login');
   const err1=h('p',{class:'err',role:'alert'}),err2=h('p',{class:'err',role:'alert'}),err3=h('p',{class:'err',role:'alert'});
   const fStud=h('form',{class:'card login'},h('h2',{},'Sono un alunno'),
@@ -1156,7 +1158,7 @@ function loginView(){
     field('t-pin','Scegli un PIN di 4–8 cifre',{inputmode:'numeric',pattern:'[0-9]{4,8}',maxlength:'8',required:true,autocomplete:'off',type:'password'}),
     h('button',{class:'btn',type:'submit'},'Crea la classe'),err2);
   fNew.addEventListener('submit',async e=>{e.preventDefault();err2.textContent='Un momento…';
-    try{const pin=$('t-pin').value;const c=await rpc('qm_crea_classe',{p_nome:$('t-nome').value,p_pin:pin});teacher={codice:c,pin};save('ultimoCodice',c);location.hash='insegnante';}
+    try{const pin=$('t-pin').value;const c=await rpc('qm_crea_classe',{p_nome:$('t-nome').value,p_pin:pin});teacher={codice:c,pin};save('ultimoCodice',c);goTeacher();}
     catch(x){err2.textContent=x.message;}});
   const fRep=h('form',{class:'card login'},h('h3',{},'Vedi i progressi della classe'),
     field('r-cod','Codice della classe',{autocomplete:'off',autocapitalize:'characters',spellcheck:'false',maxlength:'6',required:true,value:load('ultimoCodice','')}),
@@ -1164,12 +1166,15 @@ function loginView(){
     h('button',{class:'btn',type:'submit'},'Apri i progressi'),err3);
   fRep.addEventListener('submit',async e=>{e.preventDefault();err3.textContent='Un momento…';
     const t={codice:$('r-cod').value.trim().toUpperCase(),pin:$('r-pin').value};
-    try{await rpc('qm_report',{p_codice:t.codice,p_pin:t.pin});teacher=t;save('ultimoCodice',t.codice);location.hash='insegnante';}
+    try{await rpc('qm_report',{p_codice:t.codice,p_pin:t.pin});teacher=t;save('ultimoCodice',t.codice);goTeacher();}
     catch(x){err3.textContent=x.message;}});
   const guest=h('button',{class:'linkbtn',type:'button',onclick:()=>{setSess({guest:true});stars=guestStars();route();}},'Prova senza salvare i risultati');
-  view.replaceChildren(h('div',{class:'loginwrap'},
+  if(mode==='teacher')view.replaceChildren(h('div',{class:'loginwrap'},
+    h('div',{},h('h1',{class:'hero'},'Area insegnante'),h('p',{class:'intro'},'Crea una classe e dai il codice agli alunni, oppure apri i progressi della tua classe con il codice e il PIN. I progressi mostrano tutte le materie.')),
+    h('div',{class:'logingrid'},fNew,fRep)));
+  else view.replaceChildren(h('div',{class:'loginwrap'},
     h('div',{},h('h1',{class:'hero'},'Quaderno di matematica'),h('p',{class:'intro'},'Esercizi sempre nuovi su numeri, frazioni, geometria e solidi. Entra con il codice che ti ha dato l’insegnante: i tuoi esercizi e le tue stelle restano salvati su ogni dispositivo.')),
-    h('div',{class:'logingrid'},fStud,h('div',{class:'stack'},fNew,fRep)),guest));
+    h('div',{class:'logingrid one'},fStud),guest));
   $('main').scrollTop=0;
 }
 
@@ -1179,7 +1184,7 @@ const exTitle=id=>(EX.find(e=>e.id===id)||{title:OTHER_TITLES[id]||id}).title;
 const when=d=>d?new Date(d).toLocaleString('it-IT',{day:'2-digit',month:'short',hour:'2-digit',minute:'2-digit'}):'—';
 async function teacherView(){
   curEx=null;cur=null;dock.hidden=true;$('back').hidden=false;showHeader('teacher');
-  if(!teacher){loginView();return;}
+  if(!teacher){loginView('teacher');return;}
   view.replaceChildren(h('p',{class:'intro'},'Carico i progressi…'));
   let rep;try{rep=await rpc('qm_report',{p_codice:teacher.codice,p_pin:teacher.pin});}
   catch(x){view.replaceChildren(h('p',{class:'err'},x.message),h('button',{class:'btn',type:'button',onclick:teacherView},'Riprova'));return;}
@@ -1190,7 +1195,7 @@ async function teacherView(){
     h('div',{class:'kpis'},h('div',{},h('b',{},String(al.length)),h('span',{},'alunni')),h('div',{},h('b',{},String(tot)),h('span',{},'esercizi svolti')),h('div',{},h('b',{},tot?Math.round(ok/tot*100)+'%':'—'),h('span',{},'risolti da soli'))),
     h('button',{class:'btn',type:'button',onclick:teacherView},'Aggiorna'));
   const list=h('div',{class:'sheet',style:'margin-top:16px'});
-  if(!al.length)list.append(h('p',{class:'intro'},`Nessun alunno ancora. Gli alunni entrano scegliendo «Sono un alunno» e scrivendo il codice ${rep.codice} e il proprio nome.`));
+  if(!al.length)list.append(h('p',{class:'intro'},`Nessun alunno ancora. Gli alunni aprono la pagina principale, toccano «Entra con il codice della classe» e scrivono il codice ${rep.codice} e il proprio nome.`));
   else{const tb=h('table',{class:'rep'},h('thead',{},h('tr',{},h('th',{},'Alunno'),h('th',{},'★'),h('th',{},'Esercizi'),h('th',{},'Risolti da soli'),h('th',{},'Ultimo accesso'),h('th',{},''))));
     const body=h('tbody');tb.append(body);
     al.forEach(a=>{const pct=a.tentativi?Math.round(a.corretti/a.tentativi*100):null;
