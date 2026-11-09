@@ -38,6 +38,15 @@ main{max-width:980px;margin:0 auto;padding:max(24px,env(safe-area-inset-top)) ma
 .userbar[hidden]{display:none}
 .who{font-family:var(--body);font-weight:700;font-size:16px;border:2px solid var(--line);background:var(--card);border-radius:12px;min-height:46px;padding:0 16px;color:var(--ink);cursor:pointer;text-decoration:none;display:inline-flex;align-items:center}
 .who[hidden]{display:none}
+.pinbox{position:fixed;inset:0;background:#1d2b4f66;display:flex;align-items:center;justify-content:center;padding:16px;z-index:10}
+.pinbox[hidden]{display:none}
+.pincard{background:#fff;border-radius:18px;padding:22px;width:min(380px,100%);display:flex;flex-direction:column;gap:10px;box-shadow:0 10px 40px #0003}
+.pincard h2{margin:0;font-family:var(--display);font-size:24px;color:var(--ink);text-transform:none;letter-spacing:0}
+.pincard label{font-weight:700;color:var(--muted);font-size:15px}
+.pincard input{font:inherit;font-size:26px;letter-spacing:.3em;padding:10px 14px;border:3px solid var(--line);border-radius:12px;min-height:56px}
+.pincard input:focus{outline:none;border-color:var(--blue)}
+.perr{color:var(--pink);font-weight:700;margin:0;min-height:1.2em}
+.prow{display:flex;gap:10px;justify-content:flex-end}
 .btns{display:flex;gap:10px;flex-wrap:wrap;margin-left:auto}
 .who:focus-visible{outline:3px solid var(--blue);outline-offset:2px}
 .who.go-in{background:var(--blue);border-color:var(--blue);color:#fff}
@@ -69,7 +78,7 @@ h2{font-family:var(--display);font-size:20px;margin:0;color:var(--muted);text-tr
       <p>Scegli la materia e fai gli esercizi: ogni volta sono diversi.</p>
     </div>
   </header>
-  <div class="userbar" id="userbar"><p class="hello" id="hello" hidden></p><span class="btns"><button class="who" id="who" type="button" hidden></button><a class="who go-in" id="enter" href="matematica/" hidden>Entra con il codice della classe</a><a class="who" id="teach" href="matematica/#insegnante">👩‍🏫 Insegnante</a></span></div>
+  <div class="userbar" id="userbar"><p class="hello" id="hello" hidden></p><span class="btns"><button class="who" id="who" type="button" hidden></button><a class="who go-in" id="enter" href="matematica/" hidden>Entra con il codice della classe</a><button class="who" id="teach" type="button">👩‍🏫 Insegnante</button></span></div>
   <section aria-labelledby="mat">
     <h2 id="mat" style="margin-bottom:12px">Le materie</h2>
     <div class="subjects">
@@ -116,6 +125,7 @@ h2{font-family:var(--display);font-size:20px;margin:0;color:var(--muted);text-tr
     </div>
   </section>
   <p class="howto"><b>Per averlo sull’iPad:</b> apri questa pagina in Safari, tocca <b>Condividi</b> e poi <b>Aggiungi alla schermata Home</b>.</p>
+<div class="pinbox" id="pinbox" hidden><form class="pincard" id="pinform"><h2>🔒 Area insegnante</h2><label for="t-pin">PIN dell’insegnante</label><input id="t-pin" type="password" inputmode="numeric" maxlength="8" autocomplete="off" required><p class="perr" id="perr" role="alert"></p><div class="prow"><button type="button" class="who" id="pcancel">Annulla</button><button type="submit" class="who go-in">Apri</button></div></form></div>
 </main>
 <script>
 const SB_URL='https://dginlwxxuuinvpyhsyfa.supabase.co',SB_KEY='sb_publishable_QZC4rmwQcjr7-yVXHMshwA_IKNYLqZl';
@@ -138,6 +148,14 @@ if(s&&s.token){
   const per={matematica:ld('stars-matematica',ld('stars',0)),italiano:ld('stars-italiano',0),inglese:ld('stars-inglese',0),francese:ld('stars-francese',0),tedesco:ld('stars-tedesco',0)};
   show(per,per.matematica+per.italiano+per.inglese+per.francese+per.tedesco,'');
 }
+const TEACH_H='ec260c85abea2783bda50a4b182a0a898a41074e4376433798a8398c7709a037';
+const pb=document.getElementById('pinbox'),pin=document.getElementById('t-pin'),perr=document.getElementById('perr');
+function goT(){location.href='matematica/#insegnante';}
+document.getElementById('teach').addEventListener('click',()=>{let ok=false;try{ok=sessionStorage.getItem('qm-teach-ok')==='1';}catch(e){}if(ok)return goT();pb.hidden=false;perr.textContent='';pin.value='';setTimeout(()=>pin.focus(),30);});
+document.getElementById('pcancel').addEventListener('click',()=>{pb.hidden=true;});
+document.getElementById('pinform').addEventListener('submit',async e=>{e.preventDefault();let ok=false;
+  try{const b=await crypto.subtle.digest('SHA-256',new TextEncoder().encode('qm-teach:'+pin.value));ok=[...new Uint8Array(b)].map(x=>x.toString(16).padStart(2,'0')).join('')===TEACH_H;}catch(x){}
+  if(ok){try{sessionStorage.setItem('qm-teach-ok','1');}catch(x){}goT();}else{perr.textContent='PIN non corretto.';pin.value='';pin.focus();}});
 if('serviceWorker' in navigator&&location.protocol==='https:')navigator.serviceWorker.register('./sw.js').catch(()=>{});
 </script>
 </body>

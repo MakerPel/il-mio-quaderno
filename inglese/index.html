@@ -637,6 +637,15 @@ function leaveEx(){if(cur&&!cur.saved&&cur.wrong)record(false,false);}
 
 /* ---------- accesso ---------- */
 function field(id,label,attrs){return h('label',{class:'fld',for:id},h('span',{},label),h('input',{id,...attrs}));}
+const TEACH_H='ec260c85abea2783bda50a4b182a0a898a41074e4376433798a8398c7709a037';
+async function pinOk(pin){try{const b=await crypto.subtle.digest('SHA-256',new TextEncoder().encode('qm-teach:'+pin));return [...new Uint8Array(b)].map(x=>x.toString(16).padStart(2,'0')).join('')===TEACH_H;}catch(e){return false;}}
+const teachUnlocked=()=>{try{return sessionStorage.getItem('qm-teach-ok')==='1';}catch(e){return false;}};
+function pinGate(onOk){
+  const err=h('p',{class:'err',role:'alert'});const inp=h('input',{id:'g-pin',type:'password',inputmode:'numeric',maxlength:'8',autocomplete:'off',required:true});
+  const f=h('form',{class:'card login',style:'max-width:420px'},h('h2',{},'🔒 Area insegnante'),h('p',{class:'intro',style:'margin:0'},'Scrivi il PIN dell’insegnante per continuare.'),
+    h('label',{class:'fld',for:'g-pin'},h('span',{},'PIN'),inp),h('button',{class:'btn primary',type:'submit'},'Apri'),err);
+  f.addEventListener('submit',async e=>{e.preventDefault();if(await pinOk(inp.value)){try{sessionStorage.setItem('qm-teach-ok','1');}catch(x){}onOk();}else{err.textContent='PIN non corretto.';inp.value='';inp.focus();}});
+  return f;}
 function goTeacher(){if(location.hash==='#insegnante')teacherView();else location.hash='insegnante';}
 function loginView(mode){
   curEx=null;cur=null;dock.hidden=true;$('back').hidden=true;showHeader('login');
@@ -664,6 +673,7 @@ function loginView(mode){
     try{await rpc('qm_report',{p_codice:t.codice,p_pin:t.pin});teacher=t;save('ultimoCodice',t.codice);goTeacher();}
     catch(x){err3.textContent=x.message;}});
   const guest=h('button',{class:'linkbtn',type:'button',onclick:()=>{setSess({guest:true});stars=guestStars();route();}},'Prova senza salvare i risultati');
+  if(mode==='teacher'&&!teachUnlocked()){view.replaceChildren(h('div',{class:'loginwrap'},pinGate(()=>loginView('teacher'))));setTimeout(()=>{try{$('g-pin').focus();}catch(e){}},50);return;}
   if(mode==='teacher')view.replaceChildren(h('div',{class:'loginwrap'},
     h('div',{},h('h1',{class:'hero'},'Area insegnante'),h('p',{class:'intro'},'Crea una classe e dai il codice agli alunni, oppure apri i progressi della tua classe con il codice e il PIN. I progressi mostrano tutte le materie.')),
     h('div',{class:'logingrid'},fNew,fRep)));
