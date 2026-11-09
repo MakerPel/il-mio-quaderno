@@ -1,6 +1,6 @@
 # Il mio quaderno
 
-Pagina principale con le materie: **Quaderno di matematica** (`matematica/`) e **Quaderno di italiano** (`italiano/`).
+Pagina principale con le materie: **Quaderno di matematica** (`matematica/`) **Quaderno di italiano** (`italiano/`) e **Quaderno di inglese** (`inglese/`).
 
 Indirizzo: https://makerpel.github.io/il-mio-quaderno/
 
@@ -26,6 +26,7 @@ L'app si apre a tutto schermo con la sua icona e funziona anche senza rete; i ri
 
 - `index.html` – pagina principale «Il mio quaderno»
 - `matematica/index.html` – il quaderno di matematica (HTML, CSS, JavaScript, nessuna dipendenza)
+- `inglese/index.html` – il quaderno di inglese: lessico con pronuncia, lavori, luoghi, right/left, tempo libero, vacanze, famiglia, civiltà
 - `italiano/index.html` – il quaderno di italiano: 14 brani con domande, completamento, lessico, riordino, nomi e verbi
 - `manifest.webmanifest`, `sw.js`, icone – installazione come app (PWA)
 - Dati: Supabase (tabelle `qm_classi`, `qm_alunni`, `qm_risultati`, accessibili solo tramite le funzioni `qm_*`)

@@ -1171,7 +1171,7 @@ function loginView(){
 }
 
 /* ---------- pagina insegnante ---------- */
-const OTHER_TITLES={"ita-comprensione": "Italiano · Leggi e rispondi", "ita-vero-falso": "Italiano · La risposta è giusta?", "ita-sequenza": "Italiano · Metti in ordine la storia", "ita-completa": "Italiano · Completa il testo", "ita-parole": "Italiano · Che cosa vuol dire?", "ita-riordina": "Italiano · Riordina la frase", "ita-nomi-verbi": "Italiano · Nomi, verbi e articoli"};
+const OTHER_TITLES={"ita-comprensione": "Italiano · Leggi e rispondi", "ita-vero-falso": "Italiano · La risposta è giusta?", "ita-sequenza": "Italiano · Metti in ordine la storia", "ita-completa": "Italiano · Completa il testo", "ita-parole": "Italiano · Che cosa vuol dire?", "ita-riordina": "Italiano · Riordina la frase", "ita-nomi-verbi": "Italiano · Nomi, verbi e articoli", "eng-vocab": "Inglese · Words and pictures", "eng-traduci": "Inglese · Translate the word", "eng-collega": "Inglese · Match the words", "eng-spelling": "Inglese · Spell the word", "eng-jobs": "Inglese · Who am I?", "eng-dove": "Inglese · Where can you go?", "eng-right-left": "Inglese · Right or left?", "eng-family": "Inglese · My family", "eng-free-time": "Inglese · In my free time I like…", "eng-colours": "Inglese · What colour is it?", "eng-holidays": "Inglese · My summer holidays", "eng-civilta": "Inglese · Civiltà"};
 const exTitle=id=>(EX.find(e=>e.id===id)||{title:OTHER_TITLES[id]||id}).title;
 const when=d=>d?new Date(d).toLocaleString('it-IT',{day:'2-digit',month:'short',hour:'2-digit',minute:'2-digit'}):'—';
 async function teacherView(){
