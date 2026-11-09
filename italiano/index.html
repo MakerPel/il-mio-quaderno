@@ -1,0 +1,880 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#2a64d4">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="Il mio quaderno">
+<meta name="description" content="Esercizi di italiano: lettura, comprensione, lessico e grammatica.">
+<link rel="manifest" href="../manifest.webmanifest">
+<link rel="apple-touch-icon" href="../apple-touch-icon.png?v=3">
+<link rel="icon" type="image/png" href="../icon-192.png?v=3">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<title>Quaderno di italiano</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Andika:wght@400;700&family=Baloo+2:wght@600;800&display=swap" rel="stylesheet">
+<style>
+:root{
+  --paper:#f7f9fe; --grid:#e1e8f6; --card:#ffffff; --line:#cdd7ec;
+  --ink:#1d2b4f; --muted:#56627f;
+  --blue:#2a64d4; --pink:#d6336c; --yellow:#ffd43b; --green:#2b9348; --box:#8cc63f;
+  --display:"Baloo 2","Trebuchet MS",system-ui,sans-serif;
+  --body:"Andika","Verdana",system-ui,sans-serif;
+  color-scheme:light;
+  /* layout: indice a schede raggruppate → foglio d'esercizio con tastierino fisso in basso */
+}
+*{box-sizing:border-box}
+html,body{height:100%;margin:0}
+body{background-color:var(--paper);background-image:linear-gradient(var(--grid) 1px,transparent 1px),linear-gradient(90deg,var(--grid) 1px,transparent 1px);background-size:26px 26px;color:var(--ink);font-family:var(--body);font-size:18px;-webkit-tap-highlight-color:transparent;touch-action:manipulation;-webkit-user-select:none;user-select:none}
+button{font:inherit;color:inherit;cursor:pointer;touch-action:manipulation}
+button:focus-visible{outline:3px solid var(--blue);outline-offset:2px}
+#app{height:100%;display:flex;flex-direction:column}
+.top{display:flex;align-items:center;gap:12px;flex-wrap:wrap;padding:max(10px,env(safe-area-inset-top)) max(16px,env(safe-area-inset-right)) 10px max(16px,env(safe-area-inset-left));background:var(--card);border-bottom:2px solid var(--line)}
+.brand{font-family:var(--display);font-weight:800;font-size:24px;line-height:1;margin-right:auto}
+.levels{display:flex;background:var(--paper);border:2px solid var(--line);border-radius:999px;padding:3px}
+.levels button{border:0;background:none;padding:6px 14px;border-radius:999px;font-weight:700;color:var(--muted);min-height:42px}
+.levels button[aria-pressed="true"]{background:var(--ink);color:#fff}
+.stars{font-family:var(--display);font-weight:800;font-size:22px;color:#8a6400;background:#fff3c2;border:2px solid #f1d572;border-radius:999px;padding:2px 14px;font-variant-numeric:tabular-nums}
+.stars.pop{animation:pop .5s}
+@keyframes pop{50%{transform:scale(1.3)}}
+@media (prefers-reduced-motion:reduce){.stars.pop{animation:none}}
+.hublink{display:inline-flex;align-items:center;text-decoration:none;color:inherit}
+.ghost{border:2px solid var(--line);background:var(--paper);border-radius:12px;min-height:44px;padding:0 14px;font-weight:700}
+main{flex:1;overflow:auto;-webkit-overflow-scrolling:touch;padding:20px 16px 32px}
+.wrap{max-width:1000px;margin:0 auto}
+
+/* indice */
+.intro{max-width:62ch;color:var(--muted);margin:4px 0 8px;line-height:1.5}
+.group h2{font-family:var(--display);font-size:20px;margin:22px 0 10px;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;text-wrap:balance}
+.tiles{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:14px}
+.tile{display:flex;flex-direction:column;align-items:flex-start;gap:6px;text-align:left;background:var(--card);border:2px solid var(--line);border-radius:16px;padding:14px 16px;min-height:150px;box-shadow:0 4px 0 var(--line)}
+.tile:active{transform:translateY(3px);box-shadow:0 1px 0 var(--line)}
+.glyph{font-family:var(--display);font-weight:800;font-size:28px;line-height:1;padding:8px 12px;border-radius:10px;background:var(--paper);border:2px dashed var(--line);white-space:nowrap}
+.tile b{font-family:var(--display);font-size:20px;line-height:1.15;margin-top:4px}
+.tile span{color:var(--muted);font-size:15px;line-height:1.35}
+
+/* foglio */
+.sheet{background:var(--card);border:2px solid var(--line);border-radius:18px;padding:20px;box-shadow:0 4px 0 var(--line)}
+.kicker{font-size:14px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.05em}
+.sheet h1{font-family:var(--display);font-size:28px;line-height:1.1;margin:2px 0 6px;text-wrap:balance}
+.consegna{font-weight:700;text-transform:uppercase;margin:0 0 16px;color:var(--muted);line-height:1.45;font-size:16px}
+.q{display:flex;align-items:center;gap:10px 12px;flex-wrap:wrap;margin:12px 0;font-weight:700;text-transform:uppercase;line-height:1.4}
+.slot{min-width:72px;height:56px;border:3px solid var(--box);border-radius:10px;background:#fff;font-family:var(--display);font-size:28px;font-weight:800;padding:0 8px;font-variant-numeric:tabular-nums;line-height:1}
+.slot.on{border-color:var(--blue);box-shadow:0 0 0 4px #2a64d433}
+.slot.ok{border-color:var(--green);background:#e6f5ea}
+.slot.no{border-color:var(--pink);background:#fde7ef}
+.given{min-width:56px;height:56px;display:inline-flex;align-items:center;justify-content:center;font-family:var(--display);font-size:30px;font-weight:800}
+.eq{display:flex;align-items:flex-start;gap:8px 10px;flex-wrap:wrap;margin:18px 0 6px;padding:14px;background:var(--paper);border-radius:14px}
+.col{display:flex;flex-direction:column;align-items:center;gap:4px}
+.col small{font-size:12px;font-weight:700;color:var(--muted);text-transform:uppercase;text-align:center;max-width:90px}
+.op{font-family:var(--display);font-size:32px;font-weight:800;height:56px;display:inline-flex;align-items:center}
+.op.small{font-size:18px;text-transform:uppercase;color:var(--muted)}
+.choice{display:inline-flex;gap:8px;flex-wrap:wrap;border-radius:14px;padding:3px}
+.choice.ok{box-shadow:0 0 0 3px var(--green)}
+.choice.no{box-shadow:0 0 0 3px var(--pink)}
+.chip{min-height:50px;min-width:50px;padding:0 16px;border:2px solid var(--line);background:#fff;border-radius:12px;font-weight:700;font-size:18px}
+.chip.sel{background:var(--ink);color:#fff;border-color:var(--ink)}
+.split{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:24px;align-items:start}
+@media (max-width:760px){.split{grid-template-columns:1fr}}
+
+/* divisione */
+.field{display:flex;flex-wrap:wrap;gap:6px;padding:12px;border:2px dashed var(--line);border-radius:14px;margin-bottom:8px}
+.obj{width:58px;height:58px;border-radius:14px;border:2px solid transparent;background:transparent;display:flex;align-items:center;justify-content:center;padding:0}
+.obj.pending{border-color:var(--blue);background:#e3ecfd}
+.obj.grouped{border-color:#0002}
+.obj svg{width:44px;height:44px}
+
+/* incroci */
+.hit{fill:transparent;cursor:pointer}
+.mark{fill:var(--pink);pointer-events:none;display:none}
+.mark.on{display:block}
+svg.board{width:100%;height:auto;display:block;touch-action:manipulation}
+
+/* numeri relativi */
+.expr{font-family:var(--display);font-size:40px;font-weight:800;letter-spacing:.02em;text-transform:none}
+.cmp{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:12px}
+.cmprow{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:10px 12px;background:var(--paper);border-radius:14px}
+.num{font-family:var(--display);font-size:30px;font-weight:800;min-width:60px;text-align:center;font-variant-numeric:tabular-nums}
+.sym .chip{font-family:var(--display);font-size:26px;padding:0;width:50px}
+.pair .chip{font-family:var(--display);font-size:28px;min-width:96px;height:64px;border-width:3px}
+.pair .chip.sel{background:var(--yellow);color:var(--ink);border-color:#d9aa00}
+.neg{color:var(--pink)} .pos{color:var(--blue)}
+
+/* codice */
+.word{display:flex;flex-wrap:wrap;gap:10px;margin:6px 0 18px}
+.lcell{display:flex;flex-direction:column;align-items:center;gap:4px}
+.lcell .lab{font-family:var(--display);font-weight:800;font-size:18px;white-space:nowrap;min-height:26px}
+.gap{width:26px}
+.lslot{width:56px;height:60px;border:3px solid var(--box);border-radius:10px;background:#fff;font-family:var(--display);font-size:32px;font-weight:800}
+.lslot.on{border-color:var(--blue);box-shadow:0 0 0 4px #2a64d433}
+.lslot.ok{border-color:var(--green);background:#e6f5ea}
+.lslot.no{border-color:var(--pink);background:#fde7ef}
+.ctable{display:grid;grid-template-columns:repeat(13,minmax(0,1fr));gap:5px}
+@media (max-width:700px){.ctable{grid-template-columns:repeat(7,minmax(0,1fr))}}
+.ccell{display:flex;flex-direction:column;align-items:center;gap:0;padding:6px 0;border:2px solid var(--line);border-radius:10px;background:#fff}
+.ccell .n{font-family:var(--display);font-weight:800;font-size:16px;font-variant-numeric:tabular-nums}
+.ccell b{font-family:var(--display);font-size:22px}
+
+/* frazioni */
+.fracrow{display:flex;align-items:center;gap:16px;flex-wrap:wrap}
+.figbox{display:flex;flex-direction:column;align-items:center;gap:10px;padding:10px;border-radius:14px;border:3px solid transparent}
+.figbox.ok{border-color:var(--green)} .figbox.no{border-color:var(--pink)}
+.part{fill:#fff;stroke:var(--ink);stroke-width:2;cursor:pointer}
+.part.on{fill:#79aaf7}
+.frac{display:inline-flex;flex-direction:column;align-items:center;font-family:var(--display);font-weight:800;font-size:30px;line-height:1.05}
+.frac>span:first-child{border-bottom:3px solid var(--ink);padding:0 6px 2px;min-width:40px;text-align:center}
+.frac .slot{height:48px;min-width:56px;font-size:24px;margin-bottom:4px}
+.bigop{font-family:var(--display);font-size:40px;font-weight:800}
+
+/* piano */
+.pts{display:grid;grid-template-columns:1fr 1fr;gap:6px 14px;font-family:var(--display);font-weight:800;font-size:22px;margin-bottom:10px}
+.next{padding:10px 14px;border-radius:12px;background:#e3ecfd;font-weight:700;margin:8px 0 4px}
+
+/* collega */
+.match{display:grid;grid-template-columns:1fr 1fr;gap:16px 28px}
+.mcol{display:flex;flex-direction:column;gap:10px}
+.pic,.nm{position:relative;border:3px solid var(--line);background:#fff;border-radius:14px;min-height:96px;display:flex;align-items:center;justify-content:center;gap:10px;padding:6px}
+.pic svg{width:84px;height:84px}
+.nm{font-weight:700;text-transform:uppercase;font-size:18px}
+.pic.sel,.nm.sel{border-color:var(--blue);box-shadow:0 0 0 4px #2a64d433}
+.pic.no{border-color:var(--pink)!important;background:#fde7ef}
+.pic.ok{border-color:var(--green)!important;background:#e6f5ea}
+.badge{position:absolute;top:6px;left:6px;width:28px;height:28px;border-radius:50%;color:#fff;font-weight:800;font-family:var(--display);display:flex;align-items:center;justify-content:center;font-size:17px}
+
+
+/* nuovi esercizi */
+.card{background:var(--paper);border-radius:14px;padding:14px;display:flex;flex-direction:column;gap:6px;min-width:0}
+.mcq{margin:4px 0}
+.mcq .q{margin:6px 0}
+.givens{font-family:var(--display);font-weight:800;font-size:22px;display:grid;gap:2px;margin:4px 0 8px;font-variant-numeric:tabular-nums}
+.hint{color:#6b5200;font-size:15px;font-weight:700;background:#fff3c2;padding:8px 12px;border-radius:10px;display:inline-block;margin:4px 0 8px;line-height:1.4}
+.alg{font-family:"Times New Roman",Georgia,serif;font-style:italic;font-size:28px;text-transform:none}
+.alg.big{font-size:30px;line-height:1.4;margin-bottom:4px;overflow-wrap:anywhere}
+.nbox{border:2px solid var(--line);border-radius:10px;padding:2px 12px;background:#fff}
+.field.mini{border-style:solid;padding:8px;margin:0;max-width:340px}
+.field.bad{border-color:var(--pink);background:#fde7ef}
+.addrow{display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+.obj.still{width:48px;height:48px}
+.obj.cut{position:relative}
+.obj.cut::after{content:"";position:absolute;inset:4px;background:linear-gradient(45deg,transparent 44%,#d6336c 44%,#d6336c 56%,transparent 56%),linear-gradient(-45deg,transparent 44%,#d6336c 44%,#d6336c 56%,transparent 56%)}
+.flab{font-family:var(--display);font-size:24px}
+.next.bad{background:#fde7ef;color:var(--pink)}
+
+/* accesso e insegnante */
+.who{font-size:15px;white-space:pre}
+.loginwrap{display:flex;flex-direction:column;gap:18px;max-width:900px;margin:0 auto}
+.hero{font-family:var(--display);font-size:clamp(30px,5vw,44px);line-height:1.05;margin:8px 0 4px;text-wrap:balance}
+.logingrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:16px;align-items:start}
+.stack{display:flex;flex-direction:column;gap:16px}
+.login{background:var(--card);border:2px solid var(--line);box-shadow:0 4px 0 var(--line);gap:12px;padding:20px}
+.login h2{font-family:var(--display);font-size:24px;margin:0}
+.login h3{font-family:var(--display);font-size:19px;margin:0;color:var(--muted)}
+.fld{display:flex;flex-direction:column;gap:6px;font-weight:700;font-size:15px;color:var(--muted)}
+.fld input{font:inherit;font-size:22px;font-weight:700;color:var(--ink);padding:10px 14px;border:3px solid var(--line);border-radius:12px;background:#fff;min-height:54px;-webkit-user-select:text;user-select:text}
+.fld input:focus{outline:none;border-color:var(--blue);box-shadow:0 0 0 4px #2a64d433}
+#l-cod,#r-cod{text-transform:uppercase;letter-spacing:.15em;font-family:var(--display)}
+.err{color:var(--pink);font-weight:700;margin:0;min-height:1.2em}
+.linkbtn{background:none;border:0;color:var(--blue);font-weight:700;text-decoration:underline;align-self:flex-start;min-height:44px;padding:0}
+.codebox{display:inline-flex;align-items:center;gap:14px;background:#fff3c2;border:2px dashed #e0b400;border-radius:14px;padding:10px 16px;margin:8px 0 14px;flex-wrap:wrap}
+.codebox span{font-weight:700;color:#6b5200}
+.codebox b{font-family:var(--display);font-size:34px;letter-spacing:.18em}
+.kpis{display:flex;gap:12px;flex-wrap:wrap;margin-bottom:14px}
+.kpis div{background:var(--paper);border-radius:12px;padding:10px 16px;display:flex;flex-direction:column;min-width:120px}
+.kpis b{font-family:var(--display);font-size:30px;line-height:1.1;font-variant-numeric:tabular-nums}
+.kpis span{color:var(--muted);font-weight:700;font-size:14px}
+.tablewrap{overflow-x:auto}
+table.rep{width:100%;border-collapse:collapse;font-size:16px}
+.rep th{text-align:left;font-size:13px;text-transform:uppercase;color:var(--muted);padding:8px;border-bottom:2px solid var(--line)}
+.rep td{padding:10px 8px;border-bottom:1px solid var(--line);vertical-align:middle}
+.rep td.n{font-family:var(--display);font-weight:800;font-size:20px;font-variant-numeric:tabular-nums}
+.rep.small td{padding:6px 8px;font-size:15px}.rep.small td.n{font-size:17px}
+.bar{display:inline-flex;align-items:center;gap:8px;min-width:140px}
+.bar i{display:block;height:10px;border-radius:5px;background:var(--green);min-width:2px}
+.bar em{font-style:normal;font-weight:800;font-family:var(--display)}
+.det td{background:var(--paper)}
+.detbox{display:flex;flex-direction:column;gap:10px;align-items:flex-start;padding:6px 0}
+.danger{color:var(--pink);border-color:#f3b6c8}
+
+/* euro */
+.purse{display:flex;flex-wrap:wrap;gap:8px;align-items:center;padding:10px;border:2px dashed var(--line);border-radius:14px;min-height:74px;background:#fff}
+.purse.tray{border-style:solid;background:var(--paper);margin-top:6px}
+.purse.pay.ok{border:3px solid var(--green);background:#e6f5ea}
+.purse.pay.no{border:3px solid var(--pink);background:#fde7ef}
+.money{display:block;flex:none}
+.mbtn{border:0;background:none;padding:3px;border-radius:10px;min-height:44px;min-width:44px;display:flex;align-items:center;justify-content:center}
+.mbtn:active{transform:scale(.94)}
+.ph{color:var(--muted);font-weight:700}
+.prod{display:flex;flex-direction:column;align-items:center;gap:2px;background:#fff;border:2px solid var(--line);border-radius:12px;padding:8px 10px;min-width:110px;text-align:center}
+.emo{font-size:40px;line-height:1.15}
+.pname{font-weight:700;text-transform:uppercase;font-size:14px}
+.price{font-family:var(--display);font-weight:800;font-size:22px;color:var(--pink);font-variant-numeric:tabular-nums}
+.prod.big{border:0;background:none}.prod.big .emo{font-size:76px}.prod.big .pname{font-size:18px}.prod.big .price{font-size:34px}
+.flyer{display:grid;grid-template-columns:repeat(auto-fill,minmax(120px,1fr));gap:10px;margin-bottom:16px;padding:12px;border-radius:14px;background:#fff6d8;border:2px solid #f1d572}
+.rows{display:flex;flex-direction:column;gap:12px}
+.rowcard{flex-direction:row;flex-wrap:wrap;align-items:center;gap:12px 18px;justify-content:space-between}
+.cap{color:var(--muted);font-weight:700;font-size:13px;text-transform:uppercase;width:100%}
+.ptext{font-size:19px;line-height:1.5;margin:0 0 6px;max-width:70ch}
+
+/* italiano */
+.reading{background:#fffdf6;border:2px solid #efe3c4;border-radius:16px;padding:16px 18px;font-size:20px;line-height:1.65;max-height:70vh;overflow:auto;-webkit-user-select:text;user-select:text}
+.reading p{margin:0 0 .6em}
+.rhead{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;margin-bottom:6px}
+.rhead h2{font-family:var(--display);font-size:26px;margin:0;text-transform:uppercase;letter-spacing:.03em}
+.speak{font-size:16px}
+.mcq .q{text-transform:none;font-size:18px}
+.card.vf{margin-bottom:10px}.card.vf .q{text-transform:none;margin:0}
+.answer{font-size:18px}
+.wchip{min-height:48px;padding:0 14px;border:2px solid var(--line);background:#fff;border-radius:12px;font-weight:700;font-size:19px}
+.wchip:disabled{opacity:.3}
+.wchip.in{background:#e3ecfd;border-color:var(--blue)}
+.bank{display:flex;flex-wrap:wrap;gap:8px;margin-top:8px}
+.built{display:flex;flex-wrap:wrap;gap:8px;min-height:64px;padding:8px;border:2px dashed var(--line);border-radius:12px;background:#fff;align-items:center}
+.built.ok{border:3px solid var(--green);background:#e6f5ea}.built.no{border:3px solid var(--pink);background:#fde7ef}
+.seq{display:flex;flex-direction:column;gap:10px;border-radius:14px;padding:4px}
+.seq.ok{box-shadow:0 0 0 3px var(--green)}.seq.no{box-shadow:0 0 0 3px var(--pink)}
+.seqcard{display:flex;align-items:center;gap:14px;text-align:left;border:2px solid var(--line);background:#fff;border-radius:14px;padding:12px 14px;font-size:19px;line-height:1.4;min-height:60px}
+.seqcard .num{flex:none;width:40px;height:40px;border-radius:50%;border:2px dashed var(--line);display:flex;align-items:center;justify-content:center;font-family:var(--display);font-weight:800;font-size:22px}
+.seqcard.on{border-color:var(--blue);background:#eef3ff}.seqcard.on .num{background:var(--blue);color:#fff;border-style:solid;border-color:var(--blue)}
+.cloze{margin:0;line-height:2.3}
+.blank{min-width:110px;height:42px;vertical-align:middle;border:0;border-bottom:3px solid var(--box);background:#f3f9ea;border-radius:8px 8px 0 0;font:inherit;font-weight:700;padding:0 8px;margin:0 2px}
+.blank.on{border-bottom-color:var(--blue);background:#e3ecfd}.blank.ok{border-bottom-color:var(--green);background:#e6f5ea}.blank.no{border-bottom-color:var(--pink);background:#fde7ef}
+.word{font-family:var(--display);font-weight:800;font-size:30px;line-height:1.1}
+.ctx{margin:4px 0;font-size:18px;line-height:1.5}
+.ctx mark{background:#fff3c2;padding:0 3px;border-radius:4px;font-weight:700}
+.defs{flex-direction:column;align-items:stretch;width:100%}
+.defs .chip{text-align:left;padding:10px 14px;line-height:1.35}
+.legend{display:flex;gap:8px;margin-bottom:12px;flex-wrap:wrap}
+.tg{font-weight:800;font-size:14px;padding:4px 12px;border-radius:999px;color:#fff}
+.tg.n,.tw.n{background:#2a64d4;color:#fff;border-color:#2a64d4}
+.tg.v,.tw.v{background:#d6336c;color:#fff;border-color:#d6336c}
+.tg.a,.tw.a{background:#2b9348;color:#fff;border-color:#2b9348}
+.tagline{font-size:24px;line-height:2.2;margin:0}
+.tw{border:2px solid transparent;background:#f2f5fb;border-radius:10px;padding:2px 8px;font:inherit;font-weight:700;min-height:44px}
+.tw.bad{outline:3px solid var(--pink);outline-offset:1px}
+/* barra in basso */
+.dock{background:var(--card);border-top:2px solid var(--line);padding:10px max(16px,env(safe-area-inset-right)) max(10px,env(safe-area-inset-bottom)) max(16px,env(safe-area-inset-left))}
+.keypad{display:grid;grid-template-columns:repeat(13,minmax(0,1fr));gap:6px;max-width:1000px;margin:0 auto 10px}
+.keypad button{height:54px;border-radius:12px;border:2px solid var(--line);background:var(--paper);font-family:var(--display);font-size:26px;font-weight:800;box-shadow:0 3px 0 var(--line)}
+.keypad button:active{transform:translateY(2px);box-shadow:none}
+@media (max-width:620px){.keypad{grid-template-columns:repeat(7,minmax(0,1fr))}}
+.actions{display:flex;gap:10px;max-width:1000px;margin:0 auto;align-items:center;flex-wrap:wrap}
+.btn{min-height:54px;padding:0 20px;border-radius:12px;border:2px solid var(--ink);background:#fff;font-weight:800;font-family:var(--display);font-size:19px}
+.btn.primary{background:var(--blue);border-color:var(--blue);color:#fff}
+.fb{flex:1;font-family:var(--display);font-weight:800;font-size:21px;min-width:180px;line-height:1.2}
+.fb.ok{color:var(--green)} .fb.no{color:var(--pink)} .fb.info{color:var(--muted)}
+[hidden]{display:none!important}
+</style>
+</head>
+<body>
+<div id="app">
+  <header class="top">
+    <a id="hub" class="ghost hublink" href="../">‹ Il mio quaderno</a>
+    <button id="back" class="ghost" type="button" hidden>‹ Indice</button>
+    <div class="brand">Quaderno di italiano</div>
+    <div class="levels" role="group" aria-label="Livello" id="levels"></div>
+    <div class="stars" id="stars" title="Stelle guadagnate">★ 0</div>
+    <button id="who" class="ghost who" type="button" hidden></button>
+  </header>
+  <main id="main"><div class="wrap" id="view"></div></main>
+  <div class="dock" id="dock" hidden>
+    <div class="keypad" id="keypad"></div>
+    <div class="actions">
+      <div class="fb" id="fb" aria-live="polite"></div>
+      <button class="btn" id="bSol" type="button">Soluzione</button>
+      <button class="btn" id="bNew" type="button">Nuovo esercizio</button>
+      <button class="btn primary" id="bChk" type="button">Controlla</button>
+    </div>
+  </div>
+</div>
+<script>
+/* ---------- utilità ---------- */
+const NS='http://www.w3.org/2000/svg';
+function h(tag,attrs,...kids){const e=document.createElement(tag);for(const[k,v]of Object.entries(attrs||{})){if(k==='class')e.className=v;else if(k.startsWith('on'))e.addEventListener(k.slice(2),v);else if(v!==false&&v!=null)e.setAttribute(k,v===true?'':v);}for(const k of kids.flat()){if(k==null||k===false)continue;e.append(k.nodeType?k:document.createTextNode(k));}return e;}
+function s(tag,attrs,...kids){const e=document.createElementNS(NS,tag);for(const[k,v]of Object.entries(attrs||{})){if(k.startsWith('on'))e.addEventListener(k.slice(2),v);else e.setAttribute(k,v);}for(const k of kids.flat()){if(k==null)continue;e.append(k.nodeType?k:document.createTextNode(k));}return e;}
+const rnd=(a,b)=>a+Math.floor(Math.random()*(b-a+1));
+const pick=a=>a[Math.floor(Math.random()*a.length)];
+const shuffle=a=>{a=a.slice();for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];}return a;};
+const sg=n=>n>0?'+'+n:n<0?'−'+(-n):'0';
+const fmt=n=>String(Math.round(n*100)/100).replace('.',',');
+const opTxt=d=>(d>0?' + ':' − ')+Math.abs(d);
+function load(k,d){try{const v=localStorage.getItem('qm-'+k);return v==null?d:JSON.parse(v);}catch(e){return d;}}
+function save(k,v){try{localStorage.setItem('qm-'+k,JSON.stringify(v));}catch(e){}}
+const row=(text,...ctrl)=>h('div',{class:'q'},h('span',{},text),...ctrl);
+const col=(el,label)=>h('div',{class:'col'},el,label?h('small',{},label):null);
+const op=t=>h('span',{class:'op'},t);
+const given=t=>h('span',{class:'given'},t);
+const GC=['#ffe08a','#b9e4c9','#c8d9ff','#ffc9d9','#e2d1ff','#ffd7b0','#c4f0f0','#e8e8a8','#f7c8f0'];
+const PC=['#2a64d4','#d6336c','#2b9348','#b8650b','#7b3fc4'];
+
+/* ---------- caselle numeriche e scelte ---------- */
+let active=null;
+function slot(ans){const b=h('button',{class:'slot',type:'button','aria-label':'casella da riempire'});b.dataset.v='';b.ans=ans;b.addEventListener('click',()=>focusSlot(b));return b;}
+function focusSlot(b){if(active)active.classList.remove('on');active=b;if(b){b.classList.add('on');b.classList.remove('ok','no');}}
+function setSlot(b,v){b.dataset.v=v;b.textContent=v.replace('-','−');b.classList.remove('ok','no');}
+function keyPress(k){
+  if(!cur)return;
+  if(!active||!cur.el.contains(active)){const f=[...cur.el.querySelectorAll('.slot')].find(x=>x.dataset.v==='');if(!f)return;focusSlot(f);}
+  let v=active.dataset.v;
+  if(k==='back')v=v.slice(0,-1);
+  else if(k==='neg')v=v.startsWith('-')?v.slice(1):'-'+v;
+  else if(k==='comma'){if(v.includes(','))return;v=(v===''||v==='-')?v+'0,':v+',';}
+  else{if(v.replace(/[-,]/g,'').length>=7)return;v=(v==='0'||v==='-0')?v.replace('0','')+k:v+k;}
+  setSlot(active,v);
+}
+function checkSlots(root){let ok=true;root.querySelectorAll('.slot').forEach(b=>{const v=b.dataset.v;const x=Number(v.replace(',','.'));const good=v!==''&&v!=='-'&&!isNaN(x)&&Math.abs(x-b.ans)<0.001;b.classList.toggle('ok',good);b.classList.toggle('no',!good);b.classList.remove('on');if(!good)ok=false;});return ok;}
+function solveSlots(root){root.querySelectorAll('.slot').forEach(b=>{setSlot(b,fmt(b.ans));b.classList.add('ok');});}
+function choices(opts,ans,cls){const g=h('div',{class:'choice '+(cls||''),role:'group'});g.ans=ans;g.val=null;opts.forEach(o=>{const b=h('button',{type:'button',class:'chip'},o);b.addEventListener('click',()=>{g.val=o;g.querySelectorAll('.chip').forEach(x=>x.classList.toggle('sel',x===b));g.classList.remove('ok','no');});g.append(b);});return g;}
+function checkChoices(root){let ok=true;root.querySelectorAll('.choice').forEach(g=>{const good=g.val===g.ans;g.classList.toggle('ok',good);g.classList.toggle('no',!good);if(!good)ok=false;});return ok;}
+function solveChoices(root){root.querySelectorAll('.choice').forEach(g=>{g.val=g.ans;g.querySelectorAll('.chip').forEach(x=>x.classList.toggle('sel',x.textContent===g.ans));g.classList.add('ok');g.classList.remove('no');});}
+const checkAll=root=>{const a=checkSlots(root),b=checkChoices(root);return a&&b;};
+const solveAll=root=>{solveSlots(root);solveChoices(root);};
+
+/* ---------- i brani (dal file «Testi semplificati di varia tipologia») ---------- */
+const TEXTS=[
+{t:'Cibo e sport',narr:false,b:`Ecco 10 regole che devono seguire i ragazzi che vogliono praticare uno sport.
+1. Se vuoi crescere bene assaggia e mangia di tutto.
+2. Fai ogni giorno 5 pasti: prima colazione, spuntino di metà mattina, pranzo, merenda e cena.
+3. Mangia con calma e mastica bene.
+4. Bevi molta acqua ed evita le bibite gassate.
+5. Se vuoi avere molte energie fai una colazione abbondante, con latte, yogurt, cereali, pane, marmellata, miele e frutta.
+6. A pranzo fai un pasto leggero con pasta o riso con olio d’oliva, formaggio grattugiato e sughi leggeri, verdura e frutta.
+7. A cena scegli tra carne, pesce, uova, formaggio, prosciutto e legumi. Ricordati la verdura e la frutta.
+8. Preferisci merende e spuntini leggeri, cambiando spesso.
+9. Prima di fare uno sport evita cibi troppo grassi: no a paste troppo condite, formaggi cremosi, fritti, dolci con panna o crema.
+10. Mangia sempre allo stesso orario.`,
+q:[['Quanti pasti al giorno deve fare uno sportivo?','Cinque',['Tre','Due','Sette']],
+['Che cosa deve bere?','Molta acqua',['Molte bibite gassate','Solo latte','Solo succo di frutta']],
+['Quali bibite deve evitare?','Le bibite gassate',['L’acqua','Il latte','Le spremute']],
+['Qual è il pasto più importante per avere molte energie?','La colazione',['La merenda','La cena','Lo spuntino']],
+['Prima di fare sport, quali cibi deve evitare?','I cibi troppo grassi',['La frutta','La verdura','Il pane']],
+['Come deve mangiare?','Con calma, masticando bene',['Molto in fretta','Camminando','Guardando la televisione']],
+['Quando deve mangiare?','Sempre allo stesso orario',['Ogni giorno a un’ora diversa','Solo quando ha fame','Solo la sera']]]},
+{t:'Come veri scienziati',narr:true,b:`La professoressa di scienze propone agli alunni di andare ad osservare, come veri scienziati, il prato della scuola.
+I ragazzi sono entusiasti.
+Tutti si organizzano: chi prepara la macchina fotografica, chi la lente di ingrandimento, chi un cestino per raccogliere fiori e foglie.
+I ragazzi corrono, saltano, scherzano e osservano. Raccolgono fiori, foglie, semi e scattano una foto dietro l’altra.
+- Guardate, ho preso una lucertola! – grida Davide.
+- Venite ad osservarla, ragazzi – dice l’insegnante – ma poi dobbiamo lasciarla libera.
+Gli alunni studiano la lucertola in tutti i particolari.
+- Cerchiamo altri animali da studiare – propone la professoressa. – Impareremo a conoscerli meglio e a rispettarli!`,
+q:[['Chi accompagna gli alunni nel prato della scuola?','La professoressa di scienze',['Il preside','La mamma di Davide','Nessuno']],
+['Come sono gli alunni dopo la proposta dell’insegnante?','Contenti, entusiasti',['Tristi','Arrabbiati','Annoiati']],
+['Che cosa raccolgono gli alunni?','Fiori, foglie e semi',['Sassi e conchiglie','Funghi','Bottiglie e carte']],
+['Che cosa cattura Davide?','Una lucertola',['Una farfalla','Un ragno','Una rana']],
+['Che cosa devono fare con la lucertola dopo averla osservata?','Lasciarla libera',['Portarla a casa','Chiuderla in una scatola','Regalarla alla professoressa']],
+['Perché la professoressa vuole cercare altri animali?','Per conoscerli meglio e rispettarli',['Per catturarli','Per fare una gara','Per spaventarli']]]},
+{t:'Dal medico',narr:true,b:`Oggi la mamma accompagnerà Francesco dal medico.
+Francesco è ancora piccolo, ha solo tre anni, e da qualche giorno ha una fastidiosa tosse.
+La mamma è preoccupata e perciò lo ha tenuto a casa da scuola.
+Quando arrivano dal pediatra, il medico dei bambini, la mamma e Francesco si siedono in sala d’attesa e aspettano il loro turno.
+Quando entra nell’ambulatorio del medico, Francesco è un po’ spaventato. Ha paura che il medico gli faccia male.
+Il pediatra visita Francesco e controlla polmoni, cuore, gola e orecchie.
+Poi dice alla mamma che può stare tranquilla, non è niente di grave.
+Francesco dovrà prendere per qualche giorno uno sciroppo.
+Prima di uscire la mamma ringrazia il dottore e anche Francesco gli fa un sorriso. Ora il bambino non ha più paura.`,
+q:[['Perché la mamma accompagna Francesco dal medico?','Perché ha la tosse',['Perché si è rotto un braccio','Per fare un vaccino','Perché ha mal di pancia']],
+['Quanti anni ha Francesco?','Tre',['Cinque','Sette','Due']],
+['Come si chiama il medico dei bambini?','Pediatra',['Dentista','Farmacista','Veterinario']],
+['Che cosa fanno in sala d’attesa?','Aspettano il loro turno',['Giocano a carte','Fanno merenda','Dormono']],
+['Perché Francesco è spaventato?','Ha paura che il medico gli faccia male',['Non vuole tornare a scuola','Ha perso la mamma','Il medico urla']],
+['Che cosa controlla il medico?','Polmoni, cuore, gola e orecchie',['Solo i denti','I piedi','Solo gli occhi']],
+['Che cosa dice il medico alla mamma?','Che non è niente di grave',['Che Francesco deve stare in ospedale','Che deve tornare domani','Che è molto grave']],
+['Che cosa dovrà prendere Francesco?','Uno sciroppo',['Una puntura','Una pomata','Niente']],
+['Che cosa fa Francesco prima di uscire?','Fa un sorriso al dottore',['Piange','Scappa via','Si arrabbia']]]},
+{t:'Il compleanno di Elena',narr:true,b:`Oggi Elena è già sveglia alle sei di mattina. È il giorno del suo compleanno e non riesce a dormire per l’eccitazione e la curiosità.
+Mamma e papà le hanno lasciato sopra il tavolo del salotto il suo regalo: un biglietto per il concerto del suo cantante preferito! Elena non riesce a crederci!
+Quando Marta viene a prenderla per andare a scuola, Elena le racconta subito la novità.
+Marta dice che Elena è molto fortunata ad avere dei genitori così generosi.
+Elena porta a scuola caramelle e biscotti e durante la ricreazione per festeggiare li distribuisce ai suoi compagni.`,
+q:[['Perché Elena si sveglia presto?','È il suo compleanno',['Deve partire per un viaggio','Ha una verifica','Ha fame']],
+['A che ora è già sveglia Elena?','Alle sei di mattina',['A mezzogiorno','Alle nove','A mezzanotte']],
+['Dove trova il suo regalo?','Sul tavolo del salotto',['Sotto il letto','In cucina','A scuola']],
+['Che cosa le regalano mamma e papà?','Un biglietto per un concerto',['Una bicicletta','Un libro','Un gattino']],
+['Perché Marta va a casa di Elena?','Per andare a scuola insieme',['Per portarle un regalo','Per fare i compiti','Per dormire da lei']],
+['Che cosa pensa Marta dei genitori di Elena?','Che sono generosi',['Che sono severi','Che sono distratti','Che sono tristi']],
+['Che cosa porta Elena a scuola per festeggiare?','Caramelle e biscotti',['Una torta','La pizza','Dei palloncini']]]},
+{t:'In città',narr:true,b:`Oggi Giovanni deve andare in città per fare degli acquisti.
+Prima di partire si ricorda di prendere l’abbonamento dell’autobus.
+Alla fermata dell’autobus incontra dei ragazzi che conosce e li saluta.
+Sull’autobus si siede vicino al finestrino e guarda fuori.
+Quando arriva in città scende e cerca la farmacia, perché deve comperare le medicine per sua sorella, che ha il mal di gola.
+Poi va in edicola e compra il giornale per il papà.
+Dal fruttivendolo compra pesche, banane e insalata e in macelleria prende carne di manzo e pollo.
+Prima di tornare a casa Giovanni fa una passeggiata e guarda le vetrine dei negozi. Si ferma davanti alla vetrina di una libreria, dove vede un libro che vorrebbe leggere.
+Dopo un po’ Giovanni si accorge che è tardi: deve correre alla fermata dell’autobus per non perderlo.
+È stata una mattinata interessante e Giovanni è contento, perché ha fatto tante cose utili per la sua famiglia.`,
+q:[['Perché oggi Giovanni va in città?','Per fare degli acquisti',['Per andare a scuola','Per vedere un film','Per andare a lavorare']],
+['Che cosa prende prima di partire?','L’abbonamento dell’autobus',['La bicicletta','L’ombrello','Il cane']],
+['Chi incontra alla fermata dell’autobus?','Dei ragazzi che conosce',['Il papà','La sorella','La maestra']],
+['Che cosa fa sull’autobus?','Si siede vicino al finestrino e guarda fuori',['Dorme','Legge il giornale','Parla con l’autista']],
+['Perché va in farmacia?','Per le medicine della sorella',['Perché sta male lui','Per comprare caramelle','Per salutare un amico']],
+['Che cosa compra in edicola?','Il giornale per il papà',['Un fumetto','Le figurine','Un libro']],
+['Che cosa compra dal fruttivendolo?','Pesche, banane e insalata',['Carne e pollo','Pane e latte','Mele e uva']],
+['Che cosa compra in macelleria?','Carne di manzo e pollo',['Pesce','Formaggio','Insalata']],
+['Che cosa vede nella vetrina della libreria?','Un libro che vorrebbe leggere',['Un videogioco','Delle scarpe','Un pallone']],
+['Perché Giovanni deve correre alla fermata?','È tardi e non vuole perdere l’autobus',['Piove forte','Lo inseguono','Ha dimenticato la spesa']],
+['Perché Giovanni è contento?','Ha fatto cose utili per la sua famiglia',['Ha vinto un premio','Ha perso l’autobus','Ha comprato un gioco']]]},
+{t:'In palestra',narr:true,b:`A Lin piace tanto muoversi e tutte le settimane aspetta con impazienza l’ora di ginnastica.
+Anche i suoi compagni sono contenti di andare in palestra.
+Prima di cominciare tutti si devono cambiare nello spogliatoio. Ci sono due spogliatoi, uno per i maschi e uno per le femmine, e mentre si cambiano gli alunni ridono e scherzano.
+Alcuni indossano la tuta da ginnastica, altri pantaloncini e maglietta, ma tutti devono avere le scarpe da ginnastica, per non sporcare e non rovinare il pavimento della palestra.
+Durante l’ora di educazione motoria Lin e i suoi compagni provano tanti sport diversi: basket, pallavolo, atletica, rugby, calcio.
+Lin è contenta quando giocano a pallavolo, perché le piacciono gli sport di squadra ed è bravissima a fare la battuta.
+Le piace anche fare le gare di corsa, perché è velocissima e spesso vince.`,
+q:[['A Lin piace andare in palestra?','Sì, molto',['No, per niente','Solo d’estate','Non lo sa']],
+['Che cosa fanno gli alunni prima di cominciare?','Si cambiano nello spogliatoio',['Fanno merenda','Fanno i compiti','Vanno in cortile']],
+['Quanti spogliatoi ci sono?','Due',['Uno','Tre','Quattro']],
+['Come si comportano gli alunni nello spogliatoio?','Ridono e scherzano',['Litigano','Stanno zitti','Piangono']],
+['Che cosa è obbligatorio avere in palestra?','Le scarpe da ginnastica',['Il cappello','Gli occhiali','La merenda']],
+['Perché servono le scarpe da ginnastica?','Per non sporcare e rovinare il pavimento',['Per correre più veloce','Perché sono belle','Per stare al caldo']],
+['Perché a Lin piace la pallavolo?','Ama gli sport di squadra ed è brava nella battuta',['Perché è facile','Perché si gioca da soli','Perché non si corre']],
+['Perché le piacciono le gare di corsa?','È velocissima e spesso vince',['Perché sono lente','Perché perde sempre','Perché si riposa']]]},
+{t:'La camera di Sara',narr:true,b:`Quando era più piccola Sara divideva la camera con suo fratello Leonardo, ma i due litigavano sempre perché ognuno voleva più spazio. Da quando Leonardo si è trasferito in un’altra città per frequentare l’università, la stanza è rimasta tutta per Sara.
+Sara ha chiesto alla mamma di poter cambiare alcune cose e la mamma l’ha accontentata: il papà ha dipinto le pareti di colori vivaci, la mamma ha cambiato il copriletto e le tende e Sara ha appeso alle pareti i suoi poster preferiti.
+A Sara piace invitare le sue compagne di classe a casa sua e trascorrere il tempo con loro nella sua camera.
+Insieme fanno i compiti e studiano, ma anche chiacchierano, si raccontano i loro segreti e ascoltano musica.
+A volte al sabato sera qualche amica si ferma a dormire da Sara e le ragazze passano tutta la serata mangiando pizza, ridendo e scherzando.`,
+q:[['Da piccola Sara aveva una camera tutta per sé?','No, la divideva con il fratello',['Sì, sempre','No, dormiva con i nonni','Dormiva in salotto']],
+['Sara andava d’accordo con Leonardo?','No, litigavano sempre',['Sì, sempre','Non si vedevano mai','Giocavano sempre insieme']],
+['Dov’è adesso Leonardo?','In un’altra città, all’università',['In vacanza','In ospedale','Nella stanza accanto']],
+['Chi ha dipinto le pareti?','Il papà',['La mamma','Sara','Leonardo']],
+['Che cosa ha appeso Sara alle pareti?','I suoi poster preferiti',['Delle foto di famiglia','Un orologio','Dei quadri antichi']],
+['Chi invita Sara a casa sua?','Le compagne di classe',['I nonni','I vicini di casa','Le maestre']],
+['Quando qualche amica si ferma a dormire?','Il sabato sera',['Il lunedì mattina','Mai','Ogni giorno']],
+['Che cosa mangiano quella sera?','La pizza',['Il gelato','La minestra','Le patatine']]]},
+{t:'La nonna',narr:false,b:`La nonna ha quasi settant’anni e per quasi tutta la vita è stata insegnante di canto, perciò ama tutti i tipi di musica.
+La nonna ama molto anche la natura, ed in particolare gli uccelli. Infatti sa il nome di tutti gli uccelli e sa esattamente dove fanno il nido.
+Adora tutti i tipi di crostacei ed ha inventato una speciale insalata con gamberetti, polpa di granchio e polpette di pesce.
+Ogni autunno mi porta nel bosco a raccogliere funghi.
+Purtroppo la nonna non riesce a cucinare senza cantare (peccato, perché cucina proprio bene e mi piace guardarla).
+La sua frase preferita è: “Siediti qui, Stefano, così chiacchieriamo un po’!”`,
+q:[['Quanti anni ha la nonna?','Quasi settanta',['Cinquanta','Novanta','Quaranta']],
+['Che lavoro faceva la nonna?','L’insegnante di canto',['La cuoca','La dottoressa','La parrucchiera']],
+['Che tipo di musica le piace?','Tutti i tipi di musica',['Solo la musica classica','Nessuna','Solo il rock']],
+['Quali animali ama in particolare?','Gli uccelli',['I gatti','I pesci rossi','I cavalli']],
+['Che piatto ha inventato?','Un’insalata con gamberetti, granchio e pesce',['Una torta al cioccolato','Una pizza','Una minestra di verdure']],
+['Perché d’autunno va nel bosco?','Per raccogliere funghi',['Per tagliare la legna','Per fare un picnic','Per cercare castagne']],
+['Che cosa fa sempre mentre cucina?','Canta',['Balla','Legge','Telefona']],
+['Come si chiama il nipote che racconta?','Stefano',['Luca','Davide','Giovanni']]]},
+{t:'La strada per la scuola',narr:true,b:`Luca abita lontano da scuola e perciò la mattina si deve alzare presto per arrivare in tempo.
+Dopo aver fatto colazione, si veste e saluta la mamma.
+Luca prende il suo zaino blu, che è sempre pieno di libri e molto pesante, e lo sistema sulla bicicletta.
+A Luca piace andare a scuola da solo in bicicletta, perché si sente grande: infatti quando frequentava la scuola elementare i suoi genitori lo accompagnavano tutte le mattine in macchina, ma ora che frequenta la prima media è più autonomo.
+I suoi genitori si fidano di lui, ma gli raccomandano sempre di essere prudente quando è per strada.
+Luca è molto attento: corre sempre sulla pista ciclabile, si ferma quando il semaforo è rosso e attraversa la strada sulle strisce pedonali.`,
+q:[['Luca abita vicino alla sua scuola?','No, abita lontano',['Sì, molto vicino','Abita accanto alla scuola','Non si sa']],
+['Che cosa fa prima di andare a scuola?','Fa colazione, si veste e saluta la mamma',['Gioca ai videogiochi','Torna a dormire','Va al parco']],
+['Com’è lo zaino di Luca?','Blu, pieno di libri e pesante',['Rosso e leggero','Vuoto','Piccolo e verde']],
+['Con che mezzo va a scuola?','In bicicletta',['In autobus','In macchina','A piedi']],
+['Che scuola frequenta Luca?','La prima media',['La terza elementare','Il liceo','L’università']],
+['Che cosa gli raccomandano i genitori?','Di essere prudente per strada',['Di correre veloce','Di non studiare','Di tornare tardi']],
+['Dove attraversa la strada?','Sulle strisce pedonali',['Dove capita','Sotto il ponte','In mezzo alle macchine']],
+['Che cosa fa quando il semaforo è rosso?','Si ferma',['Passa veloce','Suona il campanello','Gira a destra']]]},
+{t:'La verifica di geografia',narr:true,b:`Oggi c’è la verifica di geografia.
+Tutti gli alunni sono preoccupati, perché l’argomento è difficile.
+La professoressa ha chiesto di studiare i nomi e le capitali degli Stati europei.
+Gaia si è impegnata molto, infatti ieri pomeriggio ha studiato per due ore e questa mattina si è alzata presto per ripassare.
+Prima di iniziare la verifica, la professoressa chiede agli alunni di separare i banchi e di mettere nello zaino libri e appunti. Poi distribuisce i fogli con le domande.
+Gaia riesce a rispondere con facilità alle prime, ma le ultime sono più difficili e Gaia non è sicura che le sue risposte siano giuste.
+Finita la verifica, gli alunni parlano tra loro e confrontano le risposte.
+Gaia pensa che prenderà un buon voto.`,
+q:[['Che verifica c’è oggi?','Di geografia',['Di matematica','Di storia','Di inglese']],
+['Perché gli alunni sono preoccupati?','Perché l’argomento è difficile',['Perché sono in ritardo','Perché piove','Perché manca la professoressa']],
+['Che cosa dovevano studiare?','I nomi e le capitali degli Stati europei',['I fiumi d’Italia','Le tabelline','I verbi']],
+['Quanto ha studiato Gaia ieri pomeriggio?','Due ore',['Dieci minuti','Cinque ore','Niente']],
+['Che cosa fanno gli alunni prima della verifica?','Separano i banchi e mettono via libri e appunti',['Escono in cortile','Fanno merenda','Cantano una canzone']],
+['Come sono le ultime domande?','Più difficili',['Più facili','Uguali alle prime','Non ci sono']],
+['Che cosa fanno gli alunni dopo la verifica?','Parlano e confrontano le risposte',['Vanno a casa','Dormono','Strappano i fogli']],
+['Che cosa pensa Gaia alla fine?','Che prenderà un buon voto',['Che prenderà un brutto voto','Che deve rifarla','Che non ha risposto a niente']]]},
+{t:'Le vacanze estive',narr:true,b:`Marta e i suoi compagni sono felicissimi: tra pochi giorni cominceranno le vacanze estive.
+Marta è molto stanca, perché quest’anno a scuola si è impegnata tanto, e aspetta con impazienza le vacanze.
+L’estate le piace tanto, perché quando la scuola è chiusa lei può alzarsi più tardi la mattina e giocare tutto il giorno.
+Al pomeriggio va al parco con le sue amiche. Al parco possono correre, saltare, arrampicarsi sugli alberi. Quando sono stanche si siedono all’ombra e chiacchierano, oppure vanno in gelateria a prendere un gelato per rinfrescarsi.
+Ma la cosa che piace di più a Marta è giocare alla sera a nascondino con i bambini che abitano nel suo condominio.`,
+q:[['Perché Marta è contenta?','Tra pochi giorni cominciano le vacanze',['È il suo compleanno','Ha vinto una gara','Arriva la nonna']],
+['Perché Marta è stanca?','Si è impegnata tanto a scuola',['Ha corso troppo','Ha dormito poco','È malata']],
+['Che cosa può fare d’estate la mattina?','Alzarsi più tardi',['Andare a scuola','Fare la verifica','Alzarsi prestissimo']],
+['Dove va al pomeriggio?','Al parco con le amiche',['Al mare','In biblioteca','Dal medico']],
+['Dove vanno a rinfrescarsi?','In gelateria',['In piscina','In cantina','Al cinema']],
+['A che cosa gioca la sera?','A nascondino',['A calcio','A carte','Ai videogiochi']],
+['Con chi gioca la sera?','Con i bambini del suo condominio',['Con il papà','Da sola','Con la maestra']]]},
+{t:'Lettera alla sorellina',narr:true,b:`Nella famiglia di Ludovico sono tutti felici per la sorellina appena nata.
+- La porteremo a casa domani dall’ospedale, vedrai che tesoro! – gli dice il papà.
+- Evviva! – grida Ludovico.
+Poi corre a prendere la scatola dei pennarelli e comincia a scrivere su un foglio una letterina con i colori dell’arcobaleno.
+Cara sorellina, sono proprio contento che tu sia arrivata. Noi due insieme formeremo una bella squadra e vinceremo un sacco di partite. Ti voglio già bene, tanto tanto sai! Ludovico`,
+q:[['Perché la famiglia di Ludovico è felice?','È nata una sorellina',['Hanno un cane nuovo','Vanno in vacanza','È Natale']],
+['Dove sono la mamma e la sorellina?','In ospedale',['A casa dei nonni','Al parco','A scuola']],
+['Quando porteranno a casa la sorellina?','Domani',['Oggi','Tra un mese','Non lo sanno']],
+['Che cosa usa Ludovico per scrivere la lettera?','I pennarelli',['La matita','Il computer','Il gesso']],
+['Ludovico vuole già bene alla sorellina?','Sì, tanto tanto',['No, deve prima conoscerla','No, è geloso','Non lo dice']],
+['Che cosa faranno insieme, secondo Ludovico?','Una bella squadra che vince tante partite',['Litigheranno sempre','Una torta','Un viaggio']]]},
+{t:'L’orso nero americano',narr:false,b:`L’orso nero americano è un grosso carnivoro, un animale che mangia carne.
+Quando è dritto sulle zampe inferiori è alto più di due metri.
+L’orso nero americano ha il pelo folto di colore nero o bruno. Il muso di solito è più chiaro del corpo. La coda è corta e quasi nascosta. L’orso quando cammina si appoggia alle quattro zampe a cinque dita, con grandi artigli. Riesce a spostarsi, però, anche sulle gambe posteriori.
+L’orso nero americano è molto grande, ma è anche capace di arrampicarsi e di correre veloce. Corre fino a 50 chilometri all’ora.`,
+q:[['Che cosa mangia l’orso nero?','La carne: è carnivoro',['Solo erba','Solo frutta','Solo miele']],
+['Quanto può essere alto quando sta dritto?','Più di due metri',['Un metro','Cinque metri','Mezzo metro']],
+['Di che colore è il pelo?','Nero o bruno',['Bianco','Grigio a strisce','Rosso']],
+['Com’è il muso rispetto al corpo?','Più chiaro',['Più scuro','Dello stesso colore','A macchie']],
+['Com’è la coda?','Corta e quasi nascosta',['Lunga e folta','A ricciolo','Molto lunga']],
+['Quante dita ha ogni zampa?','Cinque',['Tre','Quattro','Sei']],
+['Può arrampicarsi?','Sì',['No, mai','Solo da piccolo','Solo sulle rocce']],
+['A che velocità può correre?','Fino a 50 chilometri all’ora',['5 chilometri all’ora','200 chilometri all’ora','Non sa correre']]]},
+{t:'Mia sorella',narr:false,b:`Io mi chiamo Gaia e mia sorella si chiama Isa.
+Mia sorella ha esattamente due anni più di me.
+Da piccole dormivamo in un letto a castello e stavamo sempre insieme.
+Usavamo gli stessi libri e giocattoli, ma non litigavamo mai per questo.
+Festeggiavamo il compleanno assieme, perché eravamo nate a pochi giorni di distanza.
+Mia sorella Isa, con i suoi occhi grigi e i capelli ricci e biondi, era la più bella di noi due.
+Era sempre lei a decidere i giochi, perché era la maggiore e perché aveva un carattere deciso, mentre io ero timida e insicura.`,
+q:[['Come si chiama la sorella di Gaia?','Isa',['Elena','Marta','Sara']],
+['Quanti anni ha Isa più di Gaia?','Due',['Uno','Cinque','Dieci']],
+['Dove dormivano da piccole?','In un letto a castello',['In due camere diverse','Sul divano','Con i genitori']],
+['Litigavano per i libri e i giocattoli?','No, mai',['Sì, sempre','Solo la domenica','Ogni sera']],
+['Perché festeggiavano il compleanno insieme?','Erano nate a pochi giorni di distanza',['Erano gemelle','Era più comodo','Lo voleva la nonna']],
+['Com’era Isa?','Occhi grigi e capelli ricci e biondi',['Occhi neri e capelli lisci','Capelli rossi','Capelli corti e castani']],
+['Chi decideva i giochi?','Isa',['Gaia','La mamma','Nessuno']],
+['Com’era il carattere di Gaia?','Timida e insicura',['Decisa e sicura','Prepotente','Sempre arrabbiata']]]}
+];
+
+/* parole difficili dei brani */
+const GLOSS=[
+['pediatra','il medico dei bambini'],['ambulatorio','la stanza dove il medico visita i pazienti'],['sciroppo','una medicina liquida da bere'],
+['entusiasti','molto contenti e pieni di voglia di fare'],['abbonamento','un biglietto che vale per molti viaggi'],['edicola','il negozio dove si comprano giornali e riviste'],
+['fruttivendolo','il negozio dove si comprano frutta e verdura'],['macelleria','il negozio dove si compra la carne'],['farmacia','il negozio dove si comprano le medicine'],
+['libreria','il negozio dove si comprano i libri'],['vetrina','la parte del negozio, dietro il vetro, dove si mettono in mostra le cose'],['spogliatoio','la stanza dove ci si cambia i vestiti'],
+['impazienza','la voglia che una cosa arrivi presto'],['generosi','che regalano e danno volentieri agli altri'],['eccitazione','una forte emozione che agita'],
+['carnivoro','un animale che mangia carne'],['artigli','le unghie lunghe e appuntite di alcuni animali'],['folto','fitto, con tanti peli vicini'],
+['posteriori','che stanno dietro'],['crostacei','animali d’acqua con il guscio, come gamberi e granchi'],['copriletto','la coperta che si mette sopra il letto'],
+['condominio','un palazzo dove abitano tante famiglie'],['prudente','che fa attenzione ai pericoli'],['autonomo','che sa fare le cose da solo'],
+['ciclabile','riservata alle biciclette'],['pedonali','riservate a chi va a piedi'],['semaforo','le luci che dicono quando fermarsi o passare'],
+['legumi','fagioli, ceci, lenticchie e piselli'],['spuntino','un piccolo pasto tra un pasto e l’altro'],['mastica','schiaccia il cibo con i denti'],
+['verifica','un compito in classe per vedere che cosa si è imparato'],['ripassare','studiare di nuovo una cosa già studiata'],['appunti','le note scritte durante la lezione'],
+['timida','che si vergogna facilmente'],['insicura','che non è sicura di sé'],['castello','(letto a castello) due letti uno sopra l’altro'],
+['pennarelli','penne colorate con la punta morbida'],['università','la scuola che si frequenta dopo le superiori'],['ricreazione','la pausa durante le lezioni a scuola'],
+['sala d’attesa','la stanza dove si aspetta il proprio turno'],['lente di ingrandimento','un vetro che fa vedere le cose più grandi'],['grattugiato','ridotto in briciole con la grattugia'],
+['vivaci','allegri e pieni di colore'],['trasferito','andato ad abitare in un altro posto'],['accontentata','le ha dato quello che voleva']
+];
+
+/* frasi dei brani: /n nome, /v verbo, /a articolo */
+const TAGGED=[
+"Oggi la/a mamma/n accompagnerà/v Francesco/n dal medico/n .",
+"Francesco/n ha/v una/a fastidiosa tosse/n .",
+"Il/a pediatra/n visita/v Francesco/n e controlla/v la/a gola/n .",
+"Elena/n porta/v a scuola/n caramelle/n e biscotti/n .",
+"Giovanni/n compra/v il/a giornale/n per il/a papà/n .",
+"Lin/n aspetta/v con impazienza/n l'/a ora/n di ginnastica/n .",
+"Gli/a alunni/n ridono/v e scherzano/v nello spogliatoio/n .",
+"Il/a papà/n ha/v dipinto/v le/a pareti/n di colori/n vivaci .",
+"Sara/n ha/v appeso/v i/a poster/n alle pareti/n .",
+"La/a nonna/n ama/v molto la/a natura/n .",
+"Luca/n prende/v lo/a zaino/n e saluta/v la/a mamma/n .",
+"Luca/n si ferma/v quando il/a semaforo/n è/v rosso .",
+"Gaia/n ha/v studiato/v per due ore/n .",
+"La/a professoressa/n distribuisce/v i/a fogli/n con le/a domande/n .",
+"Marta/n va/v al parco/n con le/a amiche/n .",
+"Ludovico/n scrive/v una/a lettera/n alla sorellina/n .",
+"L'/a orso/n ha/v il/a pelo/n folto .",
+"L'/a orso/n corre/v veloce e si arrampica/v sugli alberi/n .",
+"I/a ragazzi/n raccolgono/v fiori/n , foglie/n e semi/n .",
+"Isa/n decideva/v sempre i/a giochi/n .",
+"Davide/n osserva/v una/a lucertola/n nel prato/n .",
+"La/a mamma/n ringrazia/v il/a dottore/n .",
+"Le/a ragazze/n mangiano/v la/a pizza/n e ridono/v .",
+"Un/a ragazzo/n beve/v molta acqua/n .",
+"Gli/a alunni/n separano/v i/a banchi/n ."
+];
+
+/* ---------- esercizi di italiano ---------- */
+const GROUPS=['Leggere e capire','Parole e frasi','Grammatica'];
+const mcq=(q,opts,ans)=>h('div',{class:'mcq'},h('div',{class:'q'},q),choices(opts,ans));
+const wordOpts=(ans,others,n=2)=>shuffle([ans,...shuffle(others.filter(x=>x!==ans)).slice(0,n)]);
+const card=(...k)=>h('div',{class:'card'},...k);
+const paras=tx=>tx.b.split('\n');
+const sents=tx=>paras(tx).flatMap(p=>p.match(/[^.!?]+[.!?]+[”"’]?|[^.!?]+$/g)||[]).map(x=>x.trim()).filter(x=>x.split(' ').length>=3);
+const cleanSent=x=>!/[-–“”:()]/.test(x)&&!/^\d/.test(x);
+function speakBtn(text){
+  const b=h('button',{type:'button',class:'ghost speak','aria-label':'Ascolta il brano'},'🔊 Ascolta');
+  if(!('speechSynthesis' in window)){b.hidden=true;return b;}
+  try{speechSynthesis.cancel();}catch(e){}
+  b.addEventListener('click',()=>{try{if(speechSynthesis.speaking){speechSynthesis.cancel();b.textContent='🔊 Ascolta';return;}
+    const u=new SpeechSynthesisUtterance(text.replace(/[-–]/g,', '));u.lang='it-IT';u.rate=.9;u.onend=()=>{b.textContent='🔊 Ascolta';};speechSynthesis.speak(u);b.textContent='■ Ferma';}catch(e){}});
+  return b;}
+function textCard(tx){return h('div',{class:'reading'},h('div',{class:'rhead'},h('h2',{},tx.t),speakBtn(tx.t+'. '+tx.b)),...paras(tx).map(p=>h('p',{},p)));}
+const chipBtn=(w,f,cls='')=>{const b=h('button',{type:'button',class:'wchip '+cls},w);b.addEventListener('click',f);return b;};
+
+const EX=[
+/* leggi e rispondi */
+{id:'ita-comprensione',g:0,title:'Leggi e rispondi',desc:'Leggi il brano e scegli la risposta giusta.',glyph:'📖 ?',
+make(L){
+  const tx=pick(TEXTS);const n=[3,5,7][L];const qs=L===2?tx.q.slice():shuffle(tx.q).slice(0,n);
+  if(L===2&&qs.length>n)qs.length=n;
+  const el=h('div');el.append(h('p',{class:'consegna'},'Leggi il brano. Se non conosci una parola, chiedi il significato. Poi rispondi alle domande.'));
+  const right=h('div',{},qs.map((q,i)=>mcq((i+1)+'. '+q[0],wordOpts(q[1],q[2],L===2?3:2),q[1])));
+  el.append(h('div',{class:'split'},textCard(tx),right));
+  return{el,check:()=>checkAll(el),solve:()=>solveAll(el)};
+}},
+/* la risposta è giusta? */
+{id:'ita-vero-falso',g:0,title:'La risposta è giusta?',desc:'Leggi il brano e decidi se la risposta è giusta o sbagliata.',glyph:'✔ ✘',
+make(L){
+  const tx=pick(TEXTS);const n=[4,5,6][L];
+  const el=h('div');el.append(h('p',{class:'consegna'},'Leggi il brano. Per ogni domanda decidi se la risposta proposta è giusta o sbagliata.'));
+  const right=h('div',{},shuffle(tx.q).slice(0,n).map((q,i)=>{const ok=Math.random()<.5;const a=ok?q[1]:pick(q[2]);
+    return h('div',{class:'card vf'},h('div',{class:'q'},(i+1)+'. '+q[0]),h('div',{class:'answer'},'Risposta: ',h('b',{},a)),choices(['GIUSTA','SBAGLIATA'],ok?'GIUSTA':'SBAGLIATA'));}));
+  el.append(h('div',{class:'split'},textCard(tx),right));
+  return{el,check:()=>checkAll(el),solve:()=>solveAll(el)};
+}},
+/* metti in ordine la storia */
+{id:'ita-sequenza',g:0,title:'Metti in ordine la storia',desc:'Tocca le frasi nell’ordine in cui succedono.',glyph:'1 · 2 · 3',
+make(L){
+  const n=[3,4,6][L];let tx,win;
+  for(let t=0;t<200;t++){tx=pick(TEXTS.filter(x=>x.narr));const ss=sents(tx).filter(x=>!/^[-–]/.test(x)&&x.length<190);if(ss.length<n)continue;const st=rnd(0,ss.length-n);win=ss.slice(st,st+n);if(new Set(win).size===n)break;}
+  let order=[];const cards=shuffle(win.map((s,i)=>({s,i})));
+  const box=h('div',{class:'seq'});
+  function render(){box.classList.remove('ok','no');box.replaceChildren(...cards.map(c=>{const k=order.indexOf(c);const b=h('button',{type:'button',class:'seqcard'+(k>=0?' on':'')},h('span',{class:'num'},k>=0?String(k+1):''),h('span',{},c.s));
+    b.addEventListener('click',()=>{if(k>=0)order.splice(k,1);else order.push(c);render();});return b;}));}
+  render();
+  const el=h('div');el.append(h('p',{class:'consegna'},`Brano: «${tx.t}». Tocca le frasi nell’ordine giusto: la prima diventa 1, la seconda 2… Tocca di nuovo per togliere il numero.`));
+  if(L===0){const tb=h('button',{type:'button',class:'ghost',style:'margin-bottom:10px'},'Mostra il brano');const tc=textCard(tx);tc.hidden=true;tb.addEventListener('click',()=>{tc.hidden=!tc.hidden;tb.textContent=tc.hidden?'Mostra il brano':'Nascondi il brano';});el.append(tb,tc);}
+  el.append(box);
+  return{el,check(){const ok=order.length===n&&order.every((c,k)=>c.i===k);box.classList.add(ok?'ok':'no');return ok;},solve(){order=win.map((s,i)=>cards.find(c=>c.i===i));render();box.classList.add('ok');}};
+}},
+/* completa il testo */
+{id:'ita-completa',g:1,title:'Completa il testo',desc:'Metti le parole mancanti al posto giusto.',glyph:'il ___ è',
+make(L){
+  const N=[4,6,9][L];const STOP=new Set(['perché','quando','perciò','infatti','sempre','anche','molto','dopo','prima','tutti','tutte','questo','questa','ancora','oppure','mentre','senza','loro','della','delle','degli','dello','nella','nelle','negli','sulla','sulle','alla','alle','agli','dalla','dalle','con','come','però']);
+  let tx,seg,toks,cand;
+  for(let t=0;t<100;t++){tx=pick(TEXTS);const ss=sents(tx);const st=rnd(0,Math.max(0,ss.length-5));seg=ss.slice(st,st+(L===2?7:5)).join(' ');
+    toks=seg.split(/([A-Za-zÀ-ÿ]+)/);cand=[];const seen=new Set();
+    toks.forEach((w,i)=>{if(i%2===1&&w.length>=5&&w[0]===w[0].toLowerCase()&&!STOP.has(w.toLowerCase())&&!seen.has(w.toLowerCase())&&!/^\s*$/.test(w)){seen.add(w.toLowerCase());cand.push(i);}});
+    if(cand.length>=N)break;}
+  const pickIdx=shuffle(cand).slice(0,N).sort((a,b)=>a-b);
+  const blanks=[];let act=null;
+  const para=h('p',{class:'cloze'});
+  toks.forEach((w,i)=>{if(pickIdx.includes(i)){const b=h('button',{type:'button',class:'blank'});b.ans=w;b.val='';b.addEventListener('click',()=>{if(b.val){giveBack(b);}sel(b);});blanks.push(b);para.append(b);}else para.append(w);});
+  const extra=L===2?shuffle(TEXTS.filter(x=>x!==tx).flatMap(x=>x.b.match(/\b[a-zà-ù]{6,}\b/g)||[])).filter(w=>!blanks.some(b=>b.ans===w)).slice(0,3):[];
+  const words=shuffle(blanks.map(b=>b.ans).concat(extra));
+  const bank=h('div',{class:'bank'});const chips=words.map(w=>{const c=chipBtn(w,()=>put(c));c.w=w;bank.append(c);return c;});
+  function sel(b){blanks.forEach(x=>x.classList.toggle('on',x===b));act=b;}
+  function giveBack(b){const c=chips.find(c=>c.disabled&&c.w===b.val&&c.usedBy===b);if(c){c.disabled=false;c.usedBy=null;}b.val='';b.textContent='';b.classList.remove('ok','no');}
+  function put(c){if(!act)act=blanks.find(b=>!b.val)||blanks[0];if(act.val)giveBack(act);act.val=c.w;act.textContent=c.w;c.disabled=true;c.usedBy=act;act.classList.remove('ok','no');const nx=blanks.find(b=>!b.val);sel(nx||act);}
+  sel(blanks[0]);
+  const el=h('div');el.append(h('p',{class:'consegna'},`Brano: «${tx.t}». Tocca uno spazio vuoto e poi la parola giusta.`+(L===2?' Attenzione: alcune parole sono in più.':'')),h('div',{class:'reading'},para),h('div',{class:'kicker',style:'margin-top:12px'},'Le parole'),bank);
+  return{el,check(){let ok=true;blanks.forEach(b=>{const g=b.val.toLowerCase()===b.ans.toLowerCase();b.classList.toggle('ok',g);b.classList.toggle('no',!g);b.classList.remove('on');if(!g)ok=false;});return ok;},
+    solve(){chips.forEach(c=>{c.disabled=false;c.usedBy=null;});blanks.forEach(b=>{b.val=b.ans;b.textContent=b.ans;b.classList.add('ok');b.classList.remove('no','on');const c=chips.find(c=>!c.disabled&&c.w===b.ans);if(c){c.disabled=true;c.usedBy=b;}});}};
+}},
+/* che cosa vuol dire */
+{id:'ita-parole',g:1,title:'Che cosa vuol dire?',desc:'Il significato delle parole difficili dei brani.',glyph:'Aa = ?',
+make(L){
+  const n=[3,5,6][L];const el=h('div');el.append(h('p',{class:'consegna'},'Leggi la parola nella frase del brano e scegli il suo significato.'));
+  const all=TEXTS.flatMap(t=>sents(t).map(s=>({s,t:t.t})));
+  shuffle(GLOSS).slice(0,n).forEach(([w,d])=>{const f=all.find(x=>x.s.toLowerCase().includes(w));
+    const ctx=f?h('p',{class:'ctx'},...f.s.split(new RegExp('('+w.replace(/[’']/g,'.')+')','i')).map((p,i)=>i%2?h('mark',{},p):p)):null;
+    el.append(h('div',{class:'card',style:'margin-bottom:12px'},h('div',{class:'word'},w),ctx,f?h('small',{class:'cap'},'dal brano «'+f.t+'»'):null,
+      choices(wordOpts(d,GLOSS.map(g=>g[1]),L===2?3:2),d,'defs')));});
+  return{el,check:()=>checkAll(el),solve:()=>solveAll(el)};
+}},
+/* riordina la frase */
+{id:'ita-riordina',g:1,title:'Riordina la frase',desc:'Tocca le parole nell’ordine giusto per formare la frase.',glyph:'frase ↔',
+make(L){
+  const[a,b]=[[4,6],[7,9],[10,14]][L];
+  const pool=TEXTS.flatMap(t=>sents(t).filter(cleanSent)).map(s=>s.replace(/\s+/g,' ')).filter(s=>{const n=s.split(' ').length;return n>=a&&n<=b;});
+  const el=h('div');el.append(h('p',{class:'consegna'},'Tocca le parole nell’ordine giusto. Tocca una parola nella frase per toglierla.'));
+  const parts=[];
+  shuffle(pool).slice(0,2).forEach(sent=>{const words=sent.split(' ');let order;do{order=shuffle(words.map((w,i)=>({w,i})));}while(words.length>1&&order.every((o,k)=>o.i===k));
+    let built=[];const out=h('div',{class:'built'}),bank=h('div',{class:'bank'});
+    function render(){out.classList.remove('ok','no');out.replaceChildren(...built.map((it,k)=>chipBtn(it.w,()=>{built.splice(k,1);render();},'in')));if(!built.length)out.append(h('span',{class:'ph'},'Qui si forma la frase.'));
+      bank.replaceChildren(...order.map(it=>{const c=chipBtn(it.w,()=>{built.push(it);render();});c.disabled=built.includes(it);return c;}));}
+    render();parts.push({words,out,check(){const ok=built.map(x=>x.w).join(' ')===words.join(' ');out.classList.add(ok?'ok':'no');return ok;},solve(){const used=new Set();built=words.map(w=>{const it=order.find(o=>o.w===w&&!used.has(o));used.add(it);return it;});render();out.classList.add('ok');}});
+    el.append(h('div',{class:'card',style:'margin-bottom:12px'},out,bank));});
+  return{el,check(){return parts.map(p=>p.check()).every(Boolean);},solve(){parts.forEach(p=>p.solve());}};
+}},
+/* nomi, verbi e articoli */
+{id:'ita-nomi-verbi',g:2,title:'Nomi, verbi e articoli',desc:'Tocca le parole per colorare i nomi in blu, i verbi in rosso e gli articoli in verde.',glyph:'nome · verbo',
+make(L){
+  const kinds=L===0?['n']:L===1?['n','v']:['n','v','a'];
+  const LAB={n:'NOME',v:'VERBO',a:'ARTICOLO'};
+  const el=h('div');
+  el.append(h('p',{class:'consegna'},L===0?'Tocca tutti i nomi: diventano blu. Tocca di nuovo per toglierli.':L===1?'Tocca una volta i nomi (blu) e due volte i verbi (rosso). Un altro tocco toglie il colore.':'Tocca una volta i nomi (blu), due volte i verbi (rosso), tre volte gli articoli (verde).'));
+  el.append(h('div',{class:'legend'},kinds.map(k=>h('span',{class:'tg '+k},LAB[k]))));
+  const words=[];
+  shuffle(TAGGED).slice(0,3).forEach(line=>{const p=h('p',{class:'tagline'});
+    line.split(' ').forEach((tok,i,arr)=>{const m=tok.match(/^(.*?)(?:\/([nva]))?$/);const w=m[1],tag=m[2]||'';
+      const glue=w.endsWith("'")||w.endsWith('’');const sp=(i<arr.length-1&&!glue&&!/^[.,!?]$/.test(arr[i+1]))?' ':'';
+      if(/^[.,!?]$/.test(w)){p.append(w+sp);return;}
+      const b=h('button',{type:'button',class:'tw'},w);b.tag=kinds.includes(tag)?tag:'';b.st=0;
+      b.addEventListener('click',()=>{b.st=(b.st+1)%(kinds.length+1);b.className='tw'+(b.st?' '+kinds[b.st-1]:'');});
+      words.push(b);p.append(b,sp);});
+    el.append(h('div',{class:'card',style:'margin-bottom:12px'},p));});
+  const val=b=>b.st?kinds[b.st-1]:'';
+  return{el,check(){let ok=true;words.forEach(b=>{const g=val(b)===b.tag;b.classList.toggle('bad',!g);if(!g)ok=false;});return ok;},
+    solve(){words.forEach(b=>{b.st=b.tag?kinds.indexOf(b.tag)+1:0;b.className='tw'+(b.tag?' '+b.tag:'');});}};
+}}
+];
+
+/* ---------- collegamento a Supabase ---------- */
+const SB_URL='https://dginlwxxuuinvpyhsyfa.supabase.co';
+const SB_KEY='sb_publishable_QZC4rmwQcjr7-yVXHMshwA_IKNYLqZl';
+async function rpc(fn,args){
+  let r;
+  try{r=await fetch(`${SB_URL}/rest/v1/rpc/${fn}`,{method:'POST',headers:{'Content-Type':'application/json',apikey:SB_KEY},body:JSON.stringify(args)});}
+  catch(e){const err=new Error('Nessuna connessione a Internet. Riprova tra poco.');err.offline=true;throw err;}
+  const t=await r.text();let j=null;try{j=t?JSON.parse(t):null;}catch(e){}
+  if(!r.ok)throw new Error((j&&j.message)||'Errore del server ('+r.status+')');
+  return j;
+}
+
+/* ---------- app ---------- */
+let level=load('level',0),cur=null,curEx=null;
+let sess=load('sess',null);            // {token,nome,classe,codice,stelle} oppure {guest:true}
+let stars=sess&&sess.token?(sess.stelle||0):load('stars',0);
+let queue=load('queue',[]);
+let teacher=null;                       // {codice,pin} solo in memoria
+const $=id=>document.getElementById(id);
+const view=$('view'),dock=$('dock'),fb=$('fb'),keypad=$('keypad');
+const LV=['Facile','Medio','Difficile'];
+LV.forEach((t,i)=>{const b=h('button',{type:'button','aria-pressed':String(i===level)},t);b.addEventListener('click',()=>{level=i;save('level',i);[...$('levels').children].forEach((x,j)=>x.setAttribute('aria-pressed',String(j===i)));if(curEx){leaveEx();newEx();}});$('levels').append(b);});
+[['1'],['2'],['3'],['4'],['5'],['6'],['7'],['8'],['9'],['0'],['comma',','],['neg','−'],['back','⌫']].forEach(([k,t])=>{const b=h('button',{type:'button','aria-label':k==='neg'?'segno meno':k==='back'?'cancella':k==='comma'?'virgola':k},t||k);b.addEventListener('click',()=>keyPress(k));keypad.append(b);});
+function showStars(){$('stars').textContent='★ '+stars;}
+function popStars(){const st=$('stars');st.classList.remove('pop');void st.offsetWidth;st.classList.add('pop');}
+function setSess(s){sess=s;save('sess',s);}
+function showHeader(mode){ // 'app' | 'login' | 'teacher'
+  $('hub').hidden=!$('back').hidden;
+  $('levels').hidden=mode!=='app';$('stars').hidden=mode!=='app';
+  $('who').hidden=mode==='login';
+  if(mode==='app')$('who').textContent=sess&&sess.token?`${sess.nome} · ${sess.classe} · Esci`:'Ospite · Esci';
+  if(mode==='teacher')$('who').textContent='Esci da insegnante';
+  showStars();
+}
+$('back').addEventListener('click',()=>{location.hash='';});
+$('who').addEventListener('click',()=>{
+  if(location.hash==='#insegnante'){teacher=null;location.hash='';return;}
+  leaveEx();setSess(null);stars=load('stars',0);location.hash='';route();
+});
+
+/* ---------- salvataggio dei risultati (con coda se manca la rete) ---------- */
+function record(corretto,soluzione){
+  if(!cur||cur.saved||!sess||!sess.token)return;cur.saved=true;
+  queue.push({p_token:sess.token,p_esercizio:curEx.id,p_livello:level,p_corretto:corretto,p_soluzione:soluzione});save('queue',queue);flush();
+}
+let flushing=false;
+async function flush(){
+  if(flushing||!queue.length||!sess||!sess.token)return;flushing=true;
+  try{while(queue.length){const it=queue[0];
+      try{const st=await rpc('qm_salva',it);if(it.p_token===sess.token&&typeof st==='number'){stars=st;sess.stelle=st;save('sess',sess);showStars();}}
+      catch(e){if(e.offline)break;if(/scaduto/.test(e.message)){queue.shift();save('queue',queue);setSess(null);location.hash='';route();break;}}
+      queue.shift();save('queue',queue);}}
+  finally{flushing=false;}
+}
+window.addEventListener('online',flush);
+function leaveEx(){if(cur&&!cur.saved&&cur.wrong)record(false,false);}
+
+/* ---------- accesso ---------- */
+function field(id,label,attrs){return h('label',{class:'fld',for:id},h('span',{},label),h('input',{id,...attrs}));}
+function loginView(){
+  curEx=null;cur=null;dock.hidden=true;$('back').hidden=true;showHeader('login');
+  const err1=h('p',{class:'err',role:'alert'}),err2=h('p',{class:'err',role:'alert'}),err3=h('p',{class:'err',role:'alert'});
+  const fStud=h('form',{class:'card login'},h('h2',{},'Sono un alunno'),
+    field('l-cod','Codice della classe',{autocomplete:'off',autocapitalize:'characters',spellcheck:'false',maxlength:'6',required:true,value:load('ultimoCodice','')}),
+    field('l-nome','Il tuo nome',{autocomplete:'off',maxlength:'40',required:true}),
+    h('button',{class:'btn primary',type:'submit'},'Entra'),err1);
+  fStud.addEventListener('submit',async e=>{e.preventDefault();err1.textContent='Un momento…';
+    try{const r=await rpc('qm_entra',{p_codice:$('l-cod').value,p_nome:$('l-nome').value});save('ultimoCodice',r.codice);setSess(r);stars=r.stelle||0;err1.textContent='';flush();route();}
+    catch(x){err1.textContent=x.message;}});
+  const fNew=h('form',{class:'card login'},h('h2',{},'Sono l’insegnante'),h('h3',{},'Crea una classe'),
+    field('t-nome','Nome della classe (es. 3ª B)',{autocomplete:'off',maxlength:'60',required:true}),
+    field('t-pin','Scegli un PIN di 4–8 cifre',{inputmode:'numeric',pattern:'[0-9]{4,8}',maxlength:'8',required:true,autocomplete:'off',type:'password'}),
+    h('button',{class:'btn',type:'submit'},'Crea la classe'),err2);
+  fNew.addEventListener('submit',async e=>{e.preventDefault();err2.textContent='Un momento…';
+    try{const pin=$('t-pin').value;const c=await rpc('qm_crea_classe',{p_nome:$('t-nome').value,p_pin:pin});teacher={codice:c,pin};save('ultimoCodice',c);location.hash='insegnante';}
+    catch(x){err2.textContent=x.message;}});
+  const fRep=h('form',{class:'card login'},h('h3',{},'Vedi i progressi della classe'),
+    field('r-cod','Codice della classe',{autocomplete:'off',autocapitalize:'characters',spellcheck:'false',maxlength:'6',required:true,value:load('ultimoCodice','')}),
+    field('r-pin','PIN',{inputmode:'numeric',maxlength:'8',required:true,autocomplete:'off',type:'password'}),
+    h('button',{class:'btn',type:'submit'},'Apri i progressi'),err3);
+  fRep.addEventListener('submit',async e=>{e.preventDefault();err3.textContent='Un momento…';
+    const t={codice:$('r-cod').value.trim().toUpperCase(),pin:$('r-pin').value};
+    try{await rpc('qm_report',{p_codice:t.codice,p_pin:t.pin});teacher=t;save('ultimoCodice',t.codice);location.hash='insegnante';}
+    catch(x){err3.textContent=x.message;}});
+  const guest=h('button',{class:'linkbtn',type:'button',onclick:()=>{setSess({guest:true});stars=load('stars',0);route();}},'Prova senza salvare i risultati');
+  view.replaceChildren(h('div',{class:'loginwrap'},
+    h('div',{},h('h1',{class:'hero'},'Quaderno di italiano'),h('p',{class:'intro'},'Brani da leggere, domande, parole e frasi. Entra con il codice che ti ha dato l’insegnante: i tuoi esercizi e le tue stelle restano salvati su ogni dispositivo.')),
+    h('div',{class:'logingrid'},fStud,h('div',{class:'stack'},fNew,fRep)),guest));
+  $('main').scrollTop=0;
+}
+
+/* ---------- pagina insegnante ---------- */
+const OTHER_TITLES={"divisione": "Matematica · Divisione per raggruppare", "incroci": "Matematica · Moltiplicazione con gli incroci", "retta": "Matematica · Sulla retta dei numeri", "confronta": "Matematica · Confronta i numeri", "piu-grande": "Matematica · Il numero più grande", "codice": "Matematica · Il codice segreto", "frazioni": "Matematica · Colora la frazione", "piano": "Matematica · Il piano cartesiano", "collega": "Matematica · Collega figure e nomi", "lati": "Matematica · Lati, vertici e angoli", "prima-dopo": "Matematica · Prima e dopo", "conta": "Matematica · Conta, aggiungi e togli", "monomi": "Matematica · Monomi simili", "area-quadretti": "Matematica · Area in quadretti", "perimetro-area": "Matematica · Perimetro e area", "pitagora": "Matematica · Teorema di Pitagora", "triangoli": "Matematica · Che triangolo è?", "angoli": "Matematica · Che angolo è?", "puntini": "Matematica · Unisci i puntini", "parti-cerchio": "Matematica · Le parti della circonferenza", "cerchio-misure": "Matematica · Raggio, diametro e lunghezza", "posizione-circonferenze": "Matematica · Posizione di due circonferenze", "inscritti": "Matematica · Poligoni inscritti", "solidi": "Matematica · I solidi", "conta-soldi": "Matematica · Conta i soldi", "monete-banconote": "Matematica · Monete e banconote", "paga-giusto": "Matematica · Paga il prezzo giusto", "resto": "Matematica · Il resto", "cambi": "Matematica · I cambi", "volantino": "Matematica · Il volantino della spesa", "problemi-euro": "Matematica · Problemi con l’euro"};
+const exTitle=id=>(EX.find(e=>e.id===id)||{title:OTHER_TITLES[id]||id}).title;
+const when=d=>d?new Date(d).toLocaleString('it-IT',{day:'2-digit',month:'short',hour:'2-digit',minute:'2-digit'}):'—';
+async function teacherView(){
+  curEx=null;cur=null;dock.hidden=true;$('back').hidden=false;showHeader('teacher');
+  if(!teacher){loginView();return;}
+  view.replaceChildren(h('p',{class:'intro'},'Carico i progressi…'));
+  let rep;try{rep=await rpc('qm_report',{p_codice:teacher.codice,p_pin:teacher.pin});}
+  catch(x){view.replaceChildren(h('p',{class:'err'},x.message),h('button',{class:'btn',type:'button',onclick:teacherView},'Riprova'));return;}
+  const al=rep.alunni||[];
+  const tot=al.reduce((a,x)=>a+x.tentativi,0),ok=al.reduce((a,x)=>a+x.corretti,0);
+  const head=h('div',{class:'sheet'},h('div',{class:'kicker'},'Pagina insegnante'),h('h1',{},rep.classe),
+    h('div',{class:'codebox'},h('span',{},'Codice da dare agli alunni'),h('b',{},rep.codice)),
+    h('div',{class:'kpis'},h('div',{},h('b',{},String(al.length)),h('span',{},'alunni')),h('div',{},h('b',{},String(tot)),h('span',{},'esercizi svolti')),h('div',{},h('b',{},tot?Math.round(ok/tot*100)+'%':'—'),h('span',{},'risolti da soli'))),
+    h('button',{class:'btn',type:'button',onclick:teacherView},'Aggiorna'));
+  const list=h('div',{class:'sheet',style:'margin-top:16px'});
+  if(!al.length)list.append(h('p',{class:'intro'},`Nessun alunno ancora. Gli alunni entrano scegliendo «Sono un alunno» e scrivendo il codice ${rep.codice} e il proprio nome.`));
+  else{const tb=h('table',{class:'rep'},h('thead',{},h('tr',{},h('th',{},'Alunno'),h('th',{},'★'),h('th',{},'Esercizi'),h('th',{},'Risolti da soli'),h('th',{},'Ultimo accesso'),h('th',{},''))));
+    const body=h('tbody');tb.append(body);
+    al.forEach(a=>{const pct=a.tentativi?Math.round(a.corretti/a.tentativi*100):null;
+      const det=h('tr',{class:'det',hidden:true},h('td',{colspan:'6'}));
+      const btn=h('button',{class:'ghost',type:'button'},'Dettagli');
+      btn.addEventListener('click',()=>{det.hidden=!det.hidden;btn.textContent=det.hidden?'Dettagli':'Chiudi';});
+      body.append(h('tr',{},h('td',{},h('b',{},a.nome)),h('td',{class:'n'},String(a.stelle)),h('td',{class:'n'},String(a.tentativi)),
+        h('td',{},pct==null?'—':h('span',{class:'bar'},h('i',{style:`width:${pct}%`}),h('em',{},pct+'%'))),h('td',{},when(a.ultimo_accesso)),h('td',{},btn)),det);
+      const inner=h('div',{class:'detbox'});
+      if(a.esercizi.length){const t2=h('table',{class:'rep small'},h('thead',{},h('tr',{},h('th',{},'Esercizio'),h('th',{},'Svolti'),h('th',{},'Risolti da soli'),h('th',{},'Soluzione vista'),h('th',{},'Ultima volta'))));
+        const b2=h('tbody');a.esercizi.forEach(e=>b2.append(h('tr',{},h('td',{},exTitle(e.esercizio)),h('td',{class:'n'},String(e.tentativi)),h('td',{class:'n'},String(e.corretti)),h('td',{class:'n'},String(e.soluzioni)),h('td',{},when(e.ultimo)))));t2.append(b2);inner.append(t2);}
+      else inner.append(h('p',{},'Nessun esercizio svolto.'));
+      const del=h('button',{class:'ghost danger',type:'button'},'Elimina alunno');let armed=false;
+      del.addEventListener('click',async()=>{if(!armed){armed=true;del.textContent=`Conferma: elimina ${a.nome} e i suoi risultati`;return;}
+        try{await rpc('qm_elimina_alunno',{p_codice:teacher.codice,p_pin:teacher.pin,p_alunno:a.id});teacherView();}catch(x){del.textContent=x.message;}});
+      inner.append(del);det.firstChild.append(inner);});
+    list.append(h('div',{class:'tablewrap'},tb));}
+  view.replaceChildren(head,list);
+}
+
+/* ---------- indice ed esercizi ---------- */
+function home(){curEx=null;cur=null;active=null;dock.hidden=true;$('back').hidden=true;showHeader('app');
+  view.replaceChildren(h('p',{class:'intro'},(sess&&sess.token?`Ciao ${sess.nome}! `:'')+'Scegli un esercizio. Ogni volta che premi «Nuovo esercizio» ne viene creato uno diverso. Il livello in alto cambia la difficoltà.'),
+    ...GROUPS.map((g,gi)=>h('section',{class:'group'},h('h2',{},g),h('div',{class:'tiles'},EX.filter(e=>e.g===gi).map(e=>h('button',{type:'button',class:'tile',onclick:()=>{location.hash=e.id;}},h('span',{class:'glyph'},e.glyph),h('b',{},e.title),h('span',{},e.desc)))))));
+  $('main').scrollTop=0;}
+let area;
+function openEx(ex){curEx=ex;$('back').hidden=false;dock.hidden=false;showHeader('app');area=h('div');
+  view.replaceChildren(h('div',{class:'sheet'},h('div',{class:'kicker'},GROUPS[ex.g]),h('h1',{},ex.title),area));newEx();}
+function newEx(){active=null;cur=curEx.make(level);cur.solved=false;cur.shown=false;cur.wrong=false;cur.saved=false;area.replaceChildren(cur.el);
+  const hasSlots=!!cur.el.querySelector('.slot');keypad.hidden=!hasSlots;setFb('','');
+  if(hasSlots){const f=cur.el.querySelector('.slot');if(f)focusSlot(f);}$('main').scrollTop=0;}
+function setFb(t,c){fb.textContent=t;fb.className='fb '+c;}
+$('bNew').addEventListener('click',()=>{leaveEx();newEx();});
+$('bSol').addEventListener('click',()=>{if(!cur)return;cur.solve();if(!cur.solved){cur.shown=true;record(false,true);}setFb('Ecco la soluzione. Prova con un nuovo esercizio!','info');});
+$('bChk').addEventListener('click',doCheck);
+function doCheck(){if(!cur)return;const ok=cur.check();
+  if(ok){const fresh=!cur.solved&&!cur.shown;setFb(pick(['Bravo!','Ottimo lavoro!','Perfetto!','Esatto!','Che campione!'])+(fresh?' +1 ★':''),'ok');
+    if(fresh){stars++;if(!(sess&&sess.token))save('stars',stars);showStars();popStars();record(true,false);}cur.solved=true;}
+  else{cur.wrong=true;setFb('Quasi! Controlla le parti in rosso e riprova.','no');}}
+document.addEventListener('keydown',e=>{if(!curEx||e.target.tagName==='INPUT')return;if(/^[0-9]$/.test(e.key))keyPress(e.key);else if(e.key==='-')keyPress('neg');else if(e.key===','||e.key==='.')keyPress('comma');else if(e.key==='Backspace'){e.preventDefault();keyPress('back');}else if(e.key==='Enter'){e.preventDefault();doCheck();}});
+function route(){
+  const hs=location.hash.slice(1);
+  if(curEx&&EX.find(e=>e.id===hs)!==curEx)leaveEx();
+  if(hs==='insegnante')return teacherView();
+  if(!sess)return loginView();
+  const ex=EX.find(e=>e.id===hs);ex?openEx(ex):home();
+}
+window.addEventListener('hashchange',route);route();flush();
+window.addEventListener('pagehide',leaveEx);
+if('serviceWorker' in navigator&&location.protocol==='https:')navigator.serviceWorker.register('../sw.js',{scope:'../'}).catch(()=>{});
+</script>
+</body>
+</html>
