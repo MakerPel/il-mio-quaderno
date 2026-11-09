@@ -34,6 +34,12 @@ main{max-width:980px;margin:0 auto;padding:max(24px,env(safe-area-inset-top)) ma
 .cover img{width:92px;height:92px;border-radius:20px;background:#fff;flex:none;margin-left:14px}
 .cover h1{font-family:var(--display);font-size:clamp(34px,6vw,52px);line-height:1;margin:0;text-wrap:balance}
 .cover p{margin:6px 0 0;font-size:18px;opacity:.95;max-width:46ch;line-height:1.4}
+.userbar{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap}
+.userbar[hidden]{display:none}
+.who{font-family:var(--body);font-weight:700;font-size:16px;border:2px solid var(--line);background:var(--card);border-radius:12px;min-height:46px;padding:0 16px;color:var(--ink);cursor:pointer;text-decoration:none;display:inline-flex;align-items:center}
+.who[hidden]{display:none}
+.who:focus-visible{outline:3px solid var(--blue);outline-offset:2px}
+.who.go-in{background:var(--blue);border-color:var(--blue);color:#fff}
 .hello{font-family:var(--display);font-weight:800;font-size:22px;margin:0}
 .hello[hidden]{display:none}
 h2{font-family:var(--display);font-size:20px;margin:0;color:var(--muted);text-transform:uppercase;letter-spacing:.05em}
@@ -62,7 +68,7 @@ h2{font-family:var(--display);font-size:20px;margin:0;color:var(--muted);text-tr
       <p>Scegli la materia e fai gli esercizi: ogni volta sono diversi.</p>
     </div>
   </header>
-  <p class="hello" id="hello" hidden></p>
+  <div class="userbar" id="userbar"><p class="hello" id="hello" hidden></p><button class="who" id="who" type="button" hidden></button><a class="who go-in" id="enter" href="matematica/" hidden>Entra con il codice della classe</a></div>
   <section aria-labelledby="mat">
     <h2 id="mat" style="margin-bottom:12px">Le materie</h2>
     <div class="subjects">
@@ -102,6 +108,11 @@ function show(per,tot,nome){
   SUBJS.forEach(s=>{const el=document.getElementById('stars-'+s);if(!el)return;const n=per[s]||0;el.textContent=`★ ${n} ${n===1?'stella':'stelle'}`;el.hidden=false;});
   const h=document.getElementById('hello');h.textContent=(nome?`Ciao ${nome}! `:'')+`Hai ${tot} ${tot===1?'stella':'stelle'} in tutto.`;h.hidden=false;}
 const s=ld('sess',null);
+const who=document.getElementById('who');
+who.addEventListener('click',()=>{try{localStorage.removeItem('qm-sess');}catch(e){}location.reload();});
+if(s&&s.token){who.textContent=`${s.nome} · ${s.classe} · Esci`;who.hidden=false;}
+else if(s&&s.guest){who.textContent='Ospite · Esci';who.hidden=false;}
+else document.getElementById('enter').hidden=false;
 if(s&&s.token){
   const per=s.per||{};show(per,s.per?s.per.totale:(s.stelle||0),s.nome);
   fetch(SB_URL+'/rest/v1/rpc/qm_stelle',{method:'POST',headers:{'Content-Type':'application/json',apikey:SB_KEY},body:JSON.stringify({p_token:s.token})})

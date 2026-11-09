@@ -1110,8 +1110,7 @@ function setSess(s){sess=s;save('sess',s);}
 function showHeader(mode){ // 'app' | 'login' | 'teacher'
   $('hub').hidden=!$('back').hidden;
   $('levels').hidden=mode!=='app';$('stars').hidden=mode!=='app';
-  $('who').hidden=mode==='login';
-  if(mode==='app')$('who').textContent=sess&&sess.token?`${sess.nome} · ${sess.classe} · Esci`:'Ospite · Esci';
+  $('who').hidden=mode!=='teacher';
   if(mode==='teacher')$('who').textContent='Esci da insegnante';
   showStars();
 }
