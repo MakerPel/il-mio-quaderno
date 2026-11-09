@@ -653,14 +653,14 @@ make(L){
       return;}
     const nq=[3,5,8][L];const qs=shuffle(doc.domande).slice(0,nq);
     el.append(h('p',{class:'consegna'},'Leggi il riassunto (e, se vuoi, il testo intero). Poi rispondi alle domande.'));
-    const left=h('div',{},h('div',{class:'reading'},h('div',{class:'rhead'},h('h2',{},doc.titolo),speakBtn(doc.titolo+'. '+doc.riassunto)),h('div',{class:'kicker'},'Il riassunto'),...doc.riassunto.split(/\n+/).map(p=>h('p',{},p))),
+    const left=h('div',{},h('div',{class:'reading'},h('div',{class:'rhead'},h('h2',{},doc.titolo),speakBtn(doc.titolo+'. '+doc.riassunto)),h('div',{class:'kicker'},'Il riassunto'),...(doc.riassunto.match(/[^.!?]+[.!?]+[»”"]?/g)||[doc.riassunto]).map(p=>h('p',{},p.trim()))),
       h('details',{class:'full'},h('summary',{},'Leggi il testo intero'),h('div',{class:'reading'},...doc.testo.split(/\n+/).slice(0,200).map(p=>h('p',{},p)))),
       h('button',{type:'button',class:'btn',style:'margin-top:12px',onclick:()=>{MIO.set(null);doc=null;try{speechSynthesis.cancel();}catch(e){}render();}},'📄 Carica un altro testo'));
     const right=h('div',{},qs.map((q,i)=>mcq((i+1)+'. '+q.domanda,shuffle([q.corretta,...q.sbagliate.slice(0,L===2?3:2)]),q.corretta)));
     el.append(h('div',{class:'split'},left,right));parts=true;
   }
   async function process(text,name){
-    status.textContent='Sto leggendo il testo e preparo riassunto e domande… (qualche secondo)';status.className='status';
+    status.textContent='Sto leggendo il testo e preparo riassunto e domande… Aspetta, ci vogliono fino a 20 secondi.';status.className='status';
     try{const r=await fetch(`${SB_URL}/functions/v1/qm-riassunto`,{method:'POST',headers:{'Content-Type':'application/json',apikey:SB_KEY},body:JSON.stringify({token:sess.token,testo:text})});
       const j=await r.json().catch(()=>({}));if(!r.ok||j.error)throw new Error(j.error||('errore '+r.status));
       doc={titolo:j.titolo||name,riassunto:j.riassunto,domande:j.domande,testo:text.slice(0,30000)};MIO.set(doc);render();}
