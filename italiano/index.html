@@ -254,6 +254,17 @@ table.rep{width:100%;border-collapse:collapse;font-size:16px}
 .tagline{font-size:24px;line-height:2.2;margin:0}
 .tw{border:2px solid transparent;background:#f2f5fb;border-radius:10px;padding:2px 8px;font:inherit;font-weight:700;min-height:44px}
 .tw.bad{outline:3px solid var(--pink);outline-offset:1px}
+
+/* il mio testo */
+.visually-hidden{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}
+.upload{gap:12px;align-items:flex-start}
+.upl{display:inline-flex;align-items:center;cursor:pointer;font-size:20px}
+.or{color:var(--muted);font-weight:700;text-transform:uppercase;font-size:13px}
+.pastebox{width:100%;font:inherit;font-size:17px;border:2px solid var(--line);border-radius:12px;padding:10px;-webkit-user-select:text;user-select:text;background:#fff}
+.status{margin:0;font-weight:700;color:var(--blue);min-height:1.2em}
+.status.err{color:var(--pink)}
+details.full{margin-top:10px}
+details.full summary{cursor:pointer;font-weight:700;color:var(--blue);min-height:44px;display:flex;align-items:center}
 /* barra in basso */
 .dock{background:var(--card);border-top:2px solid var(--line);padding:10px max(16px,env(safe-area-inset-right)) max(10px,env(safe-area-inset-bottom)) max(16px,env(safe-area-inset-left))}
 .keypad{display:grid;grid-template-columns:repeat(13,minmax(0,1fr));gap:6px;max-width:1000px;margin:0 auto 10px}
@@ -607,7 +618,57 @@ function speakBtn(text){
 function textCard(tx){return h('div',{class:'reading'},h('div',{class:'rhead'},h('h2',{},tx.t),speakBtn(tx.t+'. '+tx.b)),...paras(tx).map(p=>h('p',{},p)));}
 const chipBtn=(w,f,cls='')=>{const b=h('button',{type:'button',class:'wchip '+cls},w);b.addEventListener('click',f);return b;};
 
+/* il mio testo: memoria locale e lettura PDF */
+const MIO={get(){return load('mio-testo',null);},set(d){try{if(d)save('mio-testo',d);else localStorage.removeItem('qm-mio-testo');}catch(e){}}};
+let pdfjsP=null;
+function loadPdfJs(){if(window.pdfjsLib)return Promise.resolve(window.pdfjsLib);if(pdfjsP)return pdfjsP;
+  pdfjsP=new Promise((ok,ko)=>{const s=document.createElement('script');s.src='https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js';
+    s.onload=()=>{window.pdfjsLib.GlobalWorkerOptions.workerSrc='https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';ok(window.pdfjsLib);};
+    s.onerror=()=>{pdfjsP=null;ko(new Error('non riesco a caricare il lettore PDF (serve Internet)'));};document.head.append(s);});return pdfjsP;}
+async function pdfText(file){const lib=await loadPdfJs();const pdf=await lib.getDocument({data:await file.arrayBuffer()}).promise;const out=[];
+  for(let i=1;i<=Math.min(pdf.numPages,40);i++){const pg=await pdf.getPage(i);const tc=await pg.getTextContent();let line='',lastY=null;const lines=[];
+    tc.items.forEach(it=>{const y=it.transform?it.transform[5]:null;if(lastY!==null&&y!==null&&Math.abs(y-lastY)>2){lines.push(line);line='';}line+=it.str+(it.hasEOL?'\n':'');lastY=y;});lines.push(line);
+    out.push(lines.join('\n'));}
+  return out.join('\n\n').replace(/[ \t]+/g,' ').replace(/-\n(?=[a-zà-ù])/g,'').replace(/\n{3,}/g,'\n\n').trim();}
 const EX=[
+/* il mio testo: PDF → riassunto e domande con Gemini (funzione Supabase qm-riassunto) */
+{id:'ita-mio-testo',g:0,title:'Il mio testo (PDF)',desc:'Carica un PDF: l’app fa il riassunto e le domande di comprensione.',glyph:'📄 → ?',
+make(L){
+  const el=h('div');let doc=MIO.get();let parts=null;
+  const status=h('p',{class:'status',role:'status'});
+  function render(){
+    el.replaceChildren();parts=null;
+    if(!(sess&&sess.token)){el.append(h('p',{class:'consegna'},'Per caricare un testo devi entrare con il codice della classe.'),h('a',{class:'btn',href:'../',style:'display:inline-flex;align-items:center;text-decoration:none'},'Vai alla pagina principale'));return;}
+    if(!doc){
+      el.append(h('p',{class:'consegna'},'Scegli un file PDF con un testo da leggere, oppure incolla il testo. L’app scrive un riassunto semplice e prepara le domande.'));
+      const file=h('input',{type:'file',id:'pdf-in',accept:'application/pdf,.pdf',class:'visually-hidden'});
+      const pickB=h('label',{for:'pdf-in',class:'btn primary upl'},'📄 Scegli un PDF');
+      const ta=h('textarea',{id:'txt-in',rows:'6',placeholder:'…oppure incolla qui il testo',class:'pastebox'});
+      const go=h('button',{type:'button',class:'btn'},'Riassumi il testo incollato');
+      file.addEventListener('change',async()=>{const f=file.files[0];if(!f)return;status.textContent='Leggo il PDF…';status.className='status';
+        try{const t=await pdfText(f);if(t.replace(/\s/g,'').length<200){status.textContent='In questo PDF non trovo abbastanza testo: forse è una foto o una scansione. Prova a incollare il testo.';status.className='status err';return;}
+          await process(t,f.name.replace(/\.pdf$/i,''));}catch(e){status.textContent='Non riesco a leggere questo PDF: '+e.message;status.className='status err';}});
+      go.addEventListener('click',()=>{const t=ta.value.trim();if(t.length<200){status.textContent='Il testo è troppo corto: servono almeno 200 caratteri.';status.className='status err';return;}process(t,'Testo incollato');});
+      el.append(h('div',{class:'card upload'},file,pickB,h('div',{class:'or'},'oppure'),ta,go,status));
+      return;}
+    const nq=[3,5,8][L];const qs=shuffle(doc.domande).slice(0,nq);
+    el.append(h('p',{class:'consegna'},'Leggi il riassunto (e, se vuoi, il testo intero). Poi rispondi alle domande.'));
+    const left=h('div',{},h('div',{class:'reading'},h('div',{class:'rhead'},h('h2',{},doc.titolo),speakBtn(doc.titolo+'. '+doc.riassunto)),h('div',{class:'kicker'},'Il riassunto'),...doc.riassunto.split(/\n+/).map(p=>h('p',{},p))),
+      h('details',{class:'full'},h('summary',{},'Leggi il testo intero'),h('div',{class:'reading'},...doc.testo.split(/\n+/).slice(0,200).map(p=>h('p',{},p)))),
+      h('button',{type:'button',class:'btn',style:'margin-top:12px',onclick:()=>{MIO.set(null);doc=null;try{speechSynthesis.cancel();}catch(e){}render();}},'📄 Carica un altro testo'));
+    const right=h('div',{},qs.map((q,i)=>mcq((i+1)+'. '+q.domanda,shuffle([q.corretta,...q.sbagliate.slice(0,L===2?3:2)]),q.corretta)));
+    el.append(h('div',{class:'split'},left,right));parts=true;
+  }
+  async function process(text,name){
+    status.textContent='Sto leggendo il testo e preparo riassunto e domande… (qualche secondo)';status.className='status';
+    try{const r=await fetch(`${SB_URL}/functions/v1/qm-riassunto`,{method:'POST',headers:{'Content-Type':'application/json',apikey:SB_KEY},body:JSON.stringify({token:sess.token,testo:text})});
+      const j=await r.json().catch(()=>({}));if(!r.ok||j.error)throw new Error(j.error||('errore '+r.status));
+      doc={titolo:j.titolo||name,riassunto:j.riassunto,domande:j.domande,testo:text.slice(0,30000)};MIO.set(doc);render();}
+    catch(e){status.textContent=(e.message==='Failed to fetch'?'Nessuna connessione a Internet. Riprova.':e.message);status.className='status err';}
+  }
+  render();
+  return{el,check(){if(!parts){status.textContent='Prima carica un testo.';status.className='status err';return false;}return checkAll(el);},solve(){if(parts)solveAll(el);}};
+}},
 /* leggi e rispondi */
 {id:'ita-comprensione',g:0,title:'Leggi e rispondi',desc:'Leggi il brano e scegli la risposta giusta.',glyph:'📖 ?',
 make(L){
