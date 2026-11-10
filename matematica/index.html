@@ -1183,7 +1183,7 @@ function loginView(mode){
     field('l-nome','Il tuo nome',{autocomplete:'off',maxlength:'40',required:true}),
     h('button',{class:'btn primary',type:'submit'},'Entra'),err1);
   fStud.addEventListener('submit',async e=>{e.preventDefault();err1.textContent='Un momento…';
-    try{const r=await rpc('qm_entra',{p_codice:$('l-cod').value,p_nome:$('l-nome').value});save('ultimoCodice',r.codice);setSess(r);stars=0;err1.textContent='';flush();route();refreshStars();}
+    try{const r=await rpc('qm_entra',{p_codice:$('l-cod').value,p_nome:$('l-nome').value});save('ultimoCodice',r.codice);setSess(r);stars=0;err1.textContent='Fatto! Torno alla pagina principale…';location.href='../';}
     catch(x){err1.textContent=x.message;}});
   const fNew=h('form',{class:'card login'},h('h2',{},'Sono l’insegnante'),h('h3',{},'Crea una classe'),
     field('t-nome','Nome della classe (es. 3ª B)',{autocomplete:'off',maxlength:'60',required:true}),
@@ -1200,7 +1200,7 @@ function loginView(mode){
     const t={codice:$('r-cod').value.trim().toUpperCase(),pin:$('r-pin').value};
     try{await rpc('qm_report',{p_codice:t.codice,p_pin:t.pin});teacher=t;save('ultimoCodice',t.codice);goTeacher();}
     catch(x){err3.textContent=x.message;}});
-  const guest=h('button',{class:'linkbtn',type:'button',onclick:()=>{setSess({guest:true});stars=guestStars();route();}},'Prova senza salvare i risultati');
+  const guest=h('button',{class:'linkbtn',type:'button',onclick:()=>{setSess({guest:true});location.href='../';}},'Prova senza salvare i risultati');
   const rosterBox=h('div',{class:'card login roster-in',hidden:true});let rT=null,rLast='';
   async function loadRoster(){const c=($('l-cod')?.value||'').trim().toUpperCase();if(c===rLast)return;rLast=c;
     if(c.length!==6){rosterBox.hidden=true;return;}
