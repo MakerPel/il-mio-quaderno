@@ -135,6 +135,14 @@ h2{font-family:var(--display);font-size:20px;margin:0;color:var(--muted);text-tr
         <span class="stars" id="stars-tedesco" hidden></span>
         <span class="go" style="color:#b8650b">Apri il quaderno ›</span>
       </a>
+      <a class="subject" href="informatica/">
+        <span class="tab" style="background:#1e7145">Informatica</span>
+        <b>Quaderno di informatica</b>
+        <div class="sym" aria-hidden="true"><i>🖱️</i><i>⌨️</i><i>📝</i><i>📊</i></div>
+        <span class="d">Giochi con il mouse, doppio clic, trascina, tasto destro, tastiera, copia e incolla, Word ed Excel: 12 tipi di esercizi.</span>
+        <span class="stars" id="stars-informatica" hidden></span>
+        <span class="go" style="color:#1e7145">Apri il quaderno ›</span>
+      </a>
     </div>
   </section>
   <p class="howto"><b>Per averlo sull’iPad:</b> apri questa pagina in Safari, tocca <b>Condividi</b> e poi <b>Aggiungi alla schermata Home</b>.</p>
@@ -142,7 +150,7 @@ h2{font-family:var(--display);font-size:20px;margin:0;color:var(--muted);text-tr
 </main>
 <script>
 const SB_URL='https://dginlwxxuuinvpyhsyfa.supabase.co',SB_KEY='sb_publishable_QZC4rmwQcjr7-yVXHMshwA_IKNYLqZl';
-const SUBJS=['matematica','italiano','inglese','francese','tedesco'];
+const SUBJS=['matematica','italiano','inglese','francese','tedesco','informatica'];
 function ld(k,d){try{const v=localStorage.getItem('qm-'+k);return v==null?d:JSON.parse(v);}catch(e){return d;}}
 function show(per,tot,nome){
   SUBJS.forEach(s=>{const el=document.getElementById('stars-'+s);if(!el)return;const n=per[s]||0;el.textContent=`★ ${n} ${n===1?'stella':'stelle'}`;el.hidden=false;});
@@ -158,8 +166,8 @@ if(s&&s.token){
   fetch(SB_URL+'/rest/v1/rpc/qm_stelle',{method:'POST',headers:{'Content-Type':'application/json',apikey:SB_KEY},body:JSON.stringify({p_token:s.token})})
     .then(r=>r.ok?r.json():null).then(r=>{if(!r)return;s.per=r;s.stelle=r.totale;try{localStorage.setItem('qm-sess',JSON.stringify(s));}catch(e){}show(r,r.totale,s.nome);}).catch(()=>{});
 }else if(s&&s.guest){
-  const per={matematica:ld('stars-matematica',ld('stars',0)),italiano:ld('stars-italiano',0),inglese:ld('stars-inglese',0),francese:ld('stars-francese',0),tedesco:ld('stars-tedesco',0)};
-  show(per,per.matematica+per.italiano+per.inglese+per.francese+per.tedesco,'');
+  const per={matematica:ld('stars-matematica',ld('stars',0)),italiano:ld('stars-italiano',0),inglese:ld('stars-inglese',0),francese:ld('stars-francese',0),tedesco:ld('stars-tedesco',0),informatica:ld('stars-informatica',0)};
+  show(per,per.matematica+per.italiano+per.inglese+per.francese+per.tedesco+per.informatica,'');
 }
 const TEACH_H='ec260c85abea2783bda50a4b182a0a898a41074e4376433798a8398c7709a037';
 const pb=document.getElementById('pinbox'),pin=document.getElementById('t-pin'),perr=document.getElementById('perr');

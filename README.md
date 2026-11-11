@@ -1,6 +1,6 @@
 # Il mio quaderno
 
-Pagina principale con le materie: **Quaderno di matematica** (`matematica/`) **Quaderno di italiano** (`italiano/`) **Quaderno di inglese** (`inglese/`) **Quaderno di francese** (`francese/`) e **Quaderno di tedesco** (`tedesco/`).
+Pagina principale con le materie: **Quaderno di matematica** (`matematica/`) **Quaderno di italiano** (`italiano/`) **Quaderno di inglese** (`inglese/`) **Quaderno di francese** (`francese/`) **Quaderno di tedesco** (`tedesco/`) e **Quaderno di informatica** (`informatica/`).
 
 Indirizzo: https://makerpel.github.io/il-mio-quaderno/
 
@@ -26,6 +26,7 @@ L'app si apre a tutto schermo con la sua icona e funziona anche senza rete; i ri
 
 - `index.html` – pagina principale «Il mio quaderno»
 - `matematica/index.html` – il quaderno di matematica (HTML, CSS, JavaScript, nessuna dipendenza)
+- `informatica/index.html` – il quaderno di informatica: mouse, tastiera, copia e incolla, mini Word e mini Excel
 - `tedesco/index.html` – il quaderno di tedesco: saluti, nome ed età, numeri fino a 20, der/die/das, famiglia, scuola, giorni e mesi
 - `francese/index.html` – il quaderno di francese: lessico con pronuncia, mestieri, famiglia, casa, corpo, giornata, tempo, lettera, la Francia
 - `inglese/index.html` – il quaderno di inglese: lessico con pronuncia, lavori, luoghi, right/left, tempo libero, vacanze, famiglia, civiltà
